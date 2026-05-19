@@ -7,7 +7,7 @@ import Footer from "../../components/Footer";
 import { getRecords, addRecord, deleteRecord, getAcademicYears, getProgrammes } from "../../api/apiService";
 
 const emptyForm = () => ({
-  year: "", student_name: "", program_graduated: "",
+  student_name: "", program_graduated: "",
   inst_joined: "", prog_joined: "", document: null
 });
 
@@ -33,7 +33,7 @@ export default function Criterion5_2_2() {
   };
 
   const handleSave = async () => {
-    if (!form.year || !form.student_name || !form.program_graduated || !form.inst_joined || !form.prog_joined)
+    if (!form.student_name || !form.program_graduated || !form.inst_joined || !form.prog_joined)
       return showAlert("All fields are required.", "danger");
     const result = await addRecord("5_2_2", form);
     if (result.success) {
@@ -73,38 +73,37 @@ export default function Criterion5_2_2() {
             </div>
           )}
 
+          <div className="alert alert-info border-0 shadow-sm mb-4" style={{ borderRadius: 12, background: "linear-gradient(135deg,#e0f2fe,#f0f9ff)" }}>
+            <div className="fw-bold mb-1" style={{ fontSize: "0.92rem", color: "#0369a1" }}>
+              5.2.2 Number of students progressing to higher education during the year
+            </div>
+          </div>
+
           <div className="card border-0 shadow-sm mb-4" style={{ borderRadius: 14 }}>
             <div className="card-body p-4">
               <h6 className="fw-bold text-uppercase mb-3" style={{ fontSize: "0.78rem", letterSpacing: 1, color: "#888" }}>
                 <i className="bi bi-plus-circle me-2 text-danger"></i>Add Higher Education Record
               </h6>
               <div className="row g-3">
-                <div className="col-md-2">
-                  <label className="form-label fw-bold">Year</label>
-                  <select className="form-select" value={form.year} onChange={e => setForm({ ...form, year: e.target.value })}>
-                    <option value="">Select Year</option>
-                    {yearOptions.map(y => <option key={y} value={y}>{y}</option>)}
-                  </select>
-                </div>
                 <div className="col-md-3">
-                  <label className="form-label fw-bold">Student Name</label>
+                  <label className="form-label-custom" style={{fontSize: "0.75rem", fontWeight:"bold"}}>Name of student enrolling into higher education</label>
                   <input type="text" className="form-control" value={form.student_name}
                     onChange={e => setForm({ ...form, student_name: e.target.value })} />
                 </div>
-                <div className="col-md-3">
-                  <label className="form-label fw-bold">Program Graduated</label>
+                <div className="col-md-2">
+                  <label className="form-label-custom" style={{fontSize: "0.75rem", fontWeight:"bold"}}>Program graduated from</label>
                   <select className="form-select" value={form.program_graduated} onChange={e => setForm({ ...form, program_graduated: e.target.value })}>
                     <option value="">Select Program</option>
                     {programOptions.map(p => <option key={p.code} value={p.name}>{p.name}</option>)}
                   </select>
                 </div>
-                <div className="col-md-2">
-                  <label className="form-label fw-bold">Institution Joined</label>
+                <div className="col-md-3">
+                  <label className="form-label-custom" style={{fontSize: "0.75rem", fontWeight:"bold"}}>Name of institution joined</label>
                   <input type="text" className="form-control" value={form.inst_joined}
                     onChange={e => setForm({ ...form, inst_joined: e.target.value })} />
                 </div>
                 <div className="col-md-2">
-                  <label className="form-label fw-bold">Program Joined</label>
+                  <label className="form-label-custom" style={{fontSize: "0.75rem", fontWeight:"bold"}}>Name of programme admitted to</label>
                   <input type="text" className="form-control" value={form.prog_joined}
                     onChange={e => setForm({ ...form, prog_joined: e.target.value })} />
                 </div>
@@ -127,17 +126,19 @@ export default function Criterion5_2_2() {
                   <table className="table table-hover align-middle mb-0">
                     <thead className="table-dark">
                       <tr>
-                        <th>Year</th><th>Student Name</th><th>Graduated From</th>
-                        <th>Institution Joined</th><th>Program Joined</th>
+                        <th>Name of student enrolling into higher education</th>
+                        <th>Program graduated from</th>
+                        <th>Name of institution joined</th>
+                        <th>Name of programme admitted to</th>
                         <th className="text-center">PDF</th><th className="text-center">Action</th>
                       </tr>
                     </thead>
                     <tbody>
                       {records.length === 0 ? (
-                        <tr><td colSpan={7} className="text-center text-muted py-4">No records found.</td></tr>
+                        <tr><td colSpan={6} className="text-center text-muted py-4">No records found.</td></tr>
                       ) : records.map(row => (
                         <tr key={row.id}>
-                          <td>{row.year}</td><td>{row.student_name}</td>
+                          <td>{row.student_name}</td>
                           <td>{row.program_graduated}</td><td>{row.inst_joined}</td>
                           <td>{row.prog_joined}</td>
                           <td className="text-center">

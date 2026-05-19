@@ -7,9 +7,9 @@ import Footer from "../../components/Footer";
 import { getRecords, addRecord, deleteRecord, deleteRecordsBulk, getAcademicYears } from "../../api/apiService";
 
 const emptyForm = () => ({
-  year: "", exam_activity: "", exam_participants: "",
-  counseling_activity: "", counseling_participants: "",
-  placements: "", doc_link: "", document: null
+  year: "", exam_activity_name: "", exam_students_count: "",
+  counseling_activity_name: "", counseling_students_count: "",
+  students_placed: "", proof_links: "", document: null
 });
 
 export default function Criterion5_1_4() {
@@ -42,11 +42,11 @@ export default function Criterion5_1_4() {
     if (!valid.length) return showAlert("Year is required.", "danger");
     for (const row of valid) {
       const result = await addRecord("5_1_4", {
-        year: row.year, exam_activity: row.exam_activity,
-        exam_participants: row.exam_participants,
-        counseling_activity: row.counseling_activity,
-        counseling_participants: row.counseling_participants,
-        placements: row.placements, doc_link: row.doc_link
+        year: row.year, exam_activity_name: row.exam_activity_name,
+        exam_students_count: row.exam_students_count,
+        counseling_activity_name: row.counseling_activity_name,
+        counseling_students_count: row.counseling_students_count,
+        students_placed: row.students_placed, proof_links: row.proof_links
       });
       if (result.success) setRecords(prev => [...prev, result.data]);
     }
@@ -86,6 +86,12 @@ export default function Criterion5_1_4() {
             </div>
           )}
 
+          <div className="alert alert-info border-0 shadow-sm mb-4" style={{ borderRadius: 12, background: "linear-gradient(135deg,#e0f2fe,#f0f9ff)" }}>
+            <div className="fw-bold mb-1" style={{ fontSize: "0.92rem", color: "#0369a1" }}>
+              5.1.4 Number of students benefitted by guidance for competitive examinations and career counseling offered by the Institution during the year
+            </div>
+          </div>
+
           <div className="card border-0 shadow-sm mb-4" style={{ borderRadius: 14 }}>
             <div className="card-body p-4">
               <h6 className="fw-bold text-uppercase mb-3" style={{ fontSize: "0.78rem", letterSpacing: 1, color: "#888" }}>
@@ -95,48 +101,58 @@ export default function Criterion5_1_4() {
                 <div key={idx} className="p-3 border rounded bg-light mb-3">
                   <div className="row g-2 align-items-end">
                     <div className="col-md-2">
-                      <label className="form-label-custom">Year</label>
+                      <label className="form-label-custom" style={{fontSize: "0.75rem"}}>Year</label>
                       <select className="form-select form-select-sm" value={row.year} onChange={e => updateRow(idx, "year", e.target.value)}>
                         <option value="">Select Year</option>
                         {yearOptions.map(y => <option key={y} value={y}>{y}</option>)}
                       </select>
                     </div>
-                    <div className="col-md-3">
-                      <label className="form-label-custom">Competitive Exam Activity</label>
-                      <input type="text" className="form-control form-control-sm" placeholder="Name of Activity"
-                        value={row.exam_activity} onChange={e => updateRow(idx, "exam_activity", e.target.value)} />
+                    <div className="col-md-5">
+                      <div className="p-2 border rounded" style={{background: "#f8fafc"}}>
+                        <label className="form-label-custom mb-2 text-primary" style={{fontSize: "0.75rem", borderBottom: "1px solid #e2e8f0", paddingBottom: "4px", display: "block"}}>Guidance for competitive examinations</label>
+                        <div className="row g-2">
+                          <div className="col-8">
+                            <input type="text" className="form-control form-control-sm" placeholder="Name of Activity"
+                              value={row.exam_activity_name} onChange={e => updateRow(idx, "exam_activity_name", e.target.value)} />
+                          </div>
+                          <div className="col-4">
+                            <input type="number" className="form-control form-control-sm" placeholder="Students"
+                              value={row.exam_students_count} onChange={e => updateRow(idx, "exam_students_count", e.target.value)} />
+                          </div>
+                        </div>
+                      </div>
                     </div>
-                    <div className="col-md-2">
-                      <label className="form-label-custom">Exam Participants</label>
-                      <input type="number" className="form-control form-control-sm" placeholder="0"
-                        value={row.exam_participants} onChange={e => updateRow(idx, "exam_participants", e.target.value)} />
+                    <div className="col-md-5">
+                      <div className="p-2 border rounded" style={{background: "#f8fafc"}}>
+                        <label className="form-label-custom mb-2 text-primary" style={{fontSize: "0.75rem", borderBottom: "1px solid #e2e8f0", paddingBottom: "4px", display: "block"}}>Guidance for career counselling</label>
+                        <div className="row g-2">
+                          <div className="col-8">
+                            <input type="text" className="form-control form-control-sm" placeholder="Details of counselling"
+                              value={row.counseling_activity_name} onChange={e => updateRow(idx, "counseling_activity_name", e.target.value)} />
+                          </div>
+                          <div className="col-4">
+                            <input type="number" className="form-control form-control-sm" placeholder="Students"
+                              value={row.counseling_students_count} onChange={e => updateRow(idx, "counseling_students_count", e.target.value)} />
+                          </div>
+                        </div>
+                      </div>
                     </div>
-                    <div className="col-md-3">
-                      <label className="form-label-custom">Counseling Activity</label>
-                      <input type="text" className="form-control form-control-sm" placeholder="Name of Activity"
-                        value={row.counseling_activity} onChange={e => updateRow(idx, "counseling_activity", e.target.value)} />
-                    </div>
-                    <div className="col-md-2">
-                      <label className="form-label-custom">Counseling Participants</label>
-                      <input type="number" className="form-control form-control-sm" placeholder="0"
-                        value={row.counseling_participants} onChange={e => updateRow(idx, "counseling_participants", e.target.value)} />
-                    </div>
-                    <div className="col-md-3">
-                      <label className="form-label-custom">Campus Placements</label>
+                    <div className="col-md-3 mt-2">
+                      <label className="form-label-custom" style={{fontSize: "0.75rem"}}>Students placed through campus placement</label>
                       <input type="number" className="form-control form-control-sm" placeholder="No. of Students"
-                        value={row.placements} onChange={e => updateRow(idx, "placements", e.target.value)} />
+                        value={row.students_placed} onChange={e => updateRow(idx, "students_placed", e.target.value)} />
                     </div>
-                    <div className="col-md-4">
-                      <label className="form-label-custom">Evidence (PDF)</label>
+                    <div className="col-md-3 mt-2">
+                      <label className="form-label-custom" style={{fontSize: "0.75rem"}}>Link to the relevant document</label>
+                      <input type="url" className="form-control form-control-sm" placeholder="https://..."
+                        value={row.proof_links} onChange={e => updateRow(idx, "proof_links", e.target.value)} />
+                    </div>
+                    <div className="col-md-3 mt-2">
+                      <label className="form-label-custom" style={{fontSize: "0.75rem"}}>Evidence (PDF)</label>
                       <input type="file" className="form-control form-control-sm" accept=".pdf"
                         onChange={e => updateRow(idx, "document", e.target.files[0])} />
                     </div>
-                    <div className="col-md-4">
-                      <label className="form-label-custom">Doc Link</label>
-                      <input type="url" className="form-control form-control-sm" placeholder="https://..."
-                        value={row.doc_link} onChange={e => updateRow(idx, "doc_link", e.target.value)} />
-                    </div>
-                    <div className="col-md-1 d-flex align-items-end">
+                    <div className="col-md-1 d-flex align-items-end mt-2">
                       <button className="btn btn-sm btn-outline-danger w-100" onClick={() => removeRow(idx)}>×</button>
                     </div>
                   </div>
@@ -156,26 +172,34 @@ export default function Criterion5_1_4() {
                   <table className="table table-hover align-middle small">
                     <thead className="table-dark">
                       <tr>
-                        <th>Year</th>
-                        <th>Competitive Exam (Activity/Qty)</th>
-                        <th>Counseling (Activity/Qty)</th>
-                        <th>Placements</th>
-                        <th className="text-center">Evidence</th>
-                        <th className="text-center">Actions</th>
+                        <th rowSpan={2} className="align-middle">Year</th>
+                        <th colSpan={2} className="text-center border-start border-end" style={{backgroundColor: '#1f2937'}}>Name of the Activity conducted by the HEI to offer guidance for competitive examinations offered by the institution during the last five years</th>
+                        <th colSpan={2} className="text-center border-end" style={{backgroundColor: '#1f2937'}}>Name of the Activity conducted by the HEI to offer guidance for career counselling offered by the institution during the last five years</th>
+                        <th rowSpan={2} className="align-middle" style={{width: '10%'}}>Number of students placed through campus placement</th>
+                        <th rowSpan={2} className="align-middle" style={{width: '15%'}}>Link to the relevant document</th>
+                        <th rowSpan={2} className="text-center align-middle">Actions</th>
+                      </tr>
+                      <tr>
+                        <th className="border-start" style={{backgroundColor: '#374151'}}>Name of the Activity</th>
+                        <th className="border-end" style={{backgroundColor: '#374151'}}>Number of students attended / participated</th>
+                        <th style={{backgroundColor: '#374151'}}>Details of career counselling</th>
+                        <th className="border-end" style={{backgroundColor: '#374151'}}>Number of students attended / participated</th>
                       </tr>
                     </thead>
                     <tbody>
                       {records.length === 0 ? (
-                        <tr><td colSpan={6} className="text-center text-muted py-4">No records found.</td></tr>
+                        <tr><td colSpan={8} className="text-center text-muted py-4">No records found.</td></tr>
                       ) : records.map(row => (
                         <tr key={row.id}>
                           <td>{row.year}</td>
-                          <td>{row.exam_activity} ({row.exam_participants})</td>
-                          <td>{row.counseling_activity} ({row.counseling_participants})</td>
-                          <td>{row.placements}</td>
+                          <td className="border-start">{row.exam_activity_name}</td>
+                          <td className="border-end">{row.exam_students_count}</td>
+                          <td>{row.counseling_activity_name}</td>
+                          <td className="border-end">{row.counseling_students_count}</td>
+                          <td>{row.students_placed}</td>
                           <td className="text-center">
                             {row.pdf_path && <a href={row.pdf_path} target="_blank" rel="noreferrer" className="text-danger me-2"><i className="bi bi-file-earmark-pdf fs-5"></i></a>}
-                            {row.doc_link && <a href={row.doc_link} target="_blank" rel="noreferrer" className="text-primary"><i className="bi bi-link-45deg fs-5"></i></a>}
+                            {row.proof_links && <a href={row.proof_links} target="_blank" rel="noreferrer" className="text-primary"><i className="bi bi-link-45deg fs-5"></i></a>}
                           </td>
                           <td className="text-center">
                             <button className="btn btn-sm btn-outline-danger" onClick={() => handleDelete(row.id)}><i className="bi bi-trash"></i></button>

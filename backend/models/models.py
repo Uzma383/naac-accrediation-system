@@ -260,7 +260,7 @@ class C113TeacherBodies(db.Model, AuditMixin):
     __tablename__ = 'c113_teacher_bodies'
 
     id = db.Column(db.Integer, primary_key=True)
-    year = db.Column(db.Integer, nullable=False)
+    year = db.Column(db.String(20), nullable=False)
     teacher_id = db.Column(db.Integer, db.ForeignKey('teacher_lookup.id'), nullable=False)
     body_name = db.Column(db.String(255), nullable=False)
     proof_document = db.Column(db.Text, nullable=True)
@@ -334,7 +334,7 @@ class C211Enrolment(db.Model, AuditMixin):
 class C212Reservation(db.Model, AuditMixin):
     __tablename__ = 'c212_reservation'
     id = db.Column(db.Integer, primary_key=True)
-    year = db.Column(db.Integer, nullable=False)
+    year = db.Column(db.String(20), nullable=False)
     earmarked_sc = db.Column(db.Integer, nullable=True)
     earmarked_st = db.Column(db.Integer, nullable=True)
     earmarked_obc = db.Column(db.Integer, nullable=True)
@@ -391,10 +391,26 @@ class C242TeacherPhD(db.Model, AuditMixin):
 class C263PassPercentage(db.Model, AuditMixin):
     __tablename__ = 'c263_pass_percentage'
     id = db.Column(db.Integer, primary_key=True)
-    year = db.Column(db.Integer, nullable=False)
+    year = db.Column(db.String(20), nullable=False)
     program_id = db.Column(db.Integer, db.ForeignKey('program_lookup.id'), nullable=False)
     students_appeared = db.Column(db.Integer, nullable=True)
     students_passed = db.Column(db.Integer, nullable=True)
+
+class C21Students(db.Model, AuditMixin):
+    __tablename__ = 'c21_students'
+    id = db.Column(db.Integer, primary_key=True)
+    enrollment_year = db.Column(db.String(20), nullable=False)
+    student_name = db.Column(db.String(255), nullable=False)
+    enrollment_number = db.Column(db.String(100), nullable=False)
+    enrollment_date = db.Column(db.Date, nullable=True)
+
+class C22ReservedCategorySeats(db.Model, AuditMixin):
+    __tablename__ = 'c22_reserved_category_seats'
+    id = db.Column(db.Integer, primary_key=True)
+    year = db.Column(db.String(20), nullable=False)
+    category = db.Column(db.String(100), nullable=False)
+    reserved_seats = db.Column(db.Integer, nullable=False)
+    document_link = db.Column(db.Text, nullable=True)
 
 
 # ==============================================================================
@@ -412,7 +428,7 @@ class C3FullTimeTeachers(db.Model, AuditMixin):
 class C3SanctionedPosts(db.Model, AuditMixin):
     __tablename__ = 'c3_sanctioned_posts'
     id = db.Column(db.Integer, primary_key=True)
-    year = db.Column(db.Integer, nullable=False)
+    year = db.Column(db.String(20), nullable=False)
     sanctioned_posts_count = db.Column(db.Integer, nullable=True)
     supporting_document = db.Column(db.Text, nullable=True)
 
@@ -433,7 +449,7 @@ class C3ResearchProjects(db.Model, AuditMixin):
 class C313Events(db.Model, AuditMixin):
     __tablename__ = 'c313_events'
     id = db.Column(db.Integer, primary_key=True)
-    year = db.Column(db.Integer, nullable=False)
+    year = db.Column(db.String(20), nullable=False)
     event_name = db.Column(db.String(255), nullable=False)
     participant_count = db.Column(db.Integer, nullable=True)
     date_from = db.Column(db.Date, nullable=True)
@@ -483,7 +499,7 @@ class C333Outreach(db.Model, AuditMixin):
     activity_name = db.Column(db.String(255), nullable=False)
     agency_name = db.Column(db.String(255), nullable=True)
     scheme_name = db.Column(db.String(255), nullable=True)
-    year = db.Column(db.Integer, nullable=True)
+    year = db.Column(db.String(20), nullable=True)
     students_participated = db.Column(db.Integer, nullable=True)
 
 class C341Collaborations(db.Model, AuditMixin):
@@ -492,7 +508,7 @@ class C341Collaborations(db.Model, AuditMixin):
     activity_title = db.Column(db.String(255), nullable=False)
     agency_name = db.Column(db.String(255), nullable=True)
     participant_name = db.Column(db.String(255), nullable=True)
-    year = db.Column(db.Integer, nullable=True)
+    year = db.Column(db.String(20), nullable=True)
     duration = db.Column(db.String(100), nullable=True)
     nature_of_activity = db.Column(db.String(255), nullable=True)
     proof_links = db.Column(db.Text, nullable=True)
@@ -522,7 +538,7 @@ class C413ICTRooms(db.Model, AuditMixin):
 class C4Expenditure(db.Model, AuditMixin):
     __tablename__ = 'c4_expenditure'
     id = db.Column(db.Integer, primary_key=True)
-    year = db.Column(db.Integer, nullable=False)
+    year = db.Column(db.String(20), nullable=False)
     budget_infra = db.Column(db.Numeric(12, 2), nullable=True)
     expenditure_infra = db.Column(db.Numeric(12, 2), nullable=True)
     total_expenditure_excl_salary = db.Column(db.Numeric(12, 2), nullable=True)
@@ -548,7 +564,7 @@ class C42Library(db.Model, AuditMixin):
 class C511Scholarships(db.Model, AuditMixin):
     __tablename__ = 'c511_scholarships'
     id = db.Column(db.Integer, primary_key=True)
-    year = db.Column(db.Integer, nullable=False)
+    year = db.Column(db.String(20))
     scheme_name = db.Column(db.String(255), nullable=False)
     gov_student_count = db.Column(db.Integer, nullable=True)
     gov_amount = db.Column(db.Numeric(12, 2), nullable=True)
@@ -563,11 +579,13 @@ class C513SkillInitiatives(db.Model, AuditMixin):
     implementation_date = db.Column(db.Date, nullable=True)
     students_enrolled = db.Column(db.Integer, nullable=True)
     agencies_involved = db.Column(db.Text, nullable=True)
+    year = db.Column(db.String(20), nullable=True)
+    proof_links = db.Column(db.Text, nullable=True)
 
 class C514CompetitiveExams(db.Model, AuditMixin):
     __tablename__ = 'c514_competitive_exams'
     id = db.Column(db.Integer, primary_key=True)
-    year = db.Column(db.Integer, nullable=False)
+    year = db.Column(db.String(20), nullable=True)
     exam_activity_name = db.Column(db.String(255), nullable=True)
     exam_students_count = db.Column(db.Integer, nullable=True)
     counseling_activity_name = db.Column(db.String(255), nullable=True)
@@ -578,7 +596,7 @@ class C514CompetitiveExams(db.Model, AuditMixin):
 class C521Placements(db.Model, AuditMixin):
     __tablename__ = 'c521_placements'
     id = db.Column(db.Integer, primary_key=True)
-    year = db.Column(db.Integer, nullable=False)
+    year = db.Column(db.String(20), nullable=True)
     student_id = db.Column(db.Integer, db.ForeignKey('student_lookup.id'), nullable=False)
     program_graduated = db.Column(db.String(255), nullable=True)
     employer_name = db.Column(db.String(255), nullable=True)
@@ -598,7 +616,7 @@ class C522HigherEd(db.Model, AuditMixin):
 class C523QualifyingExams(db.Model, AuditMixin):
     __tablename__ = 'c523_qualifying_exams'
     id = db.Column(db.Integer, primary_key=True)
-    year = db.Column(db.Integer, nullable=False)
+    year = db.Column(db.String(20), nullable=True)
     student_id = db.Column(db.Integer, db.ForeignKey('student_lookup.id'), nullable=False)
     registration_number = db.Column(db.String(100), nullable=True)
     exam_type = db.Column(db.String(100), nullable=True)
@@ -607,7 +625,7 @@ class C523QualifyingExams(db.Model, AuditMixin):
 class C531SportsAwards(db.Model, AuditMixin):
     __tablename__ = 'c531_sports_awards'
     id = db.Column(db.Integer, primary_key=True)
-    year = db.Column(db.Integer, nullable=False)
+    year = db.Column(db.String(20), nullable=True)
     award_name = db.Column(db.String(255), nullable=False)
     team_or_individual = db.Column(db.String(20), nullable=True)
     level = db.Column(db.String(50), nullable=True)
@@ -634,12 +652,12 @@ class C623EGovernance(db.Model, AuditMixin):
     area = db.Column(db.String(100), nullable=False)
     vendor_name = db.Column(db.String(255), nullable=True)
     vendor_contact = db.Column(db.String(255), nullable=True)
-    year_of_implementation = db.Column(db.Integer, nullable=True)
+    year_of_implementation = db.Column(db.String(20), nullable=True)
 
 class C632TeacherFinancial(db.Model, AuditMixin):
     __tablename__ = 'c632_teacher_financial'
     id = db.Column(db.Integer, primary_key=True)
-    year = db.Column(db.Integer, nullable=False)
+    year = db.Column(db.String(20), nullable=True)
     teacher_id = db.Column(db.Integer, db.ForeignKey('teacher_lookup.id'), nullable=False)
     conference_name = db.Column(db.String(255), nullable=True)
     professional_body = db.Column(db.String(255), nullable=True)
@@ -651,6 +669,7 @@ class C633StaffTraining(db.Model, AuditMixin):
     id = db.Column(db.Integer, primary_key=True)
     date_from = db.Column(db.Date, nullable=True)
     date_to = db.Column(db.Date, nullable=True)
+    dates_from_to = db.Column(db.String(200), nullable=True)
     teaching_program_title = db.Column(db.String(255), nullable=True)
     non_teaching_program_title = db.Column(db.String(255), nullable=True)
     participant_count = db.Column(db.Integer, nullable=True)
@@ -662,12 +681,13 @@ class C634TeacherFDP(db.Model, AuditMixin):
     program_title = db.Column(db.String(255), nullable=False)
     duration_from = db.Column(db.Date, nullable=True)
     duration_to = db.Column(db.Date, nullable=True)
+    duration_from_to = db.Column(db.String(200), nullable=True)
     teacher = db.relationship('Teacher', backref='fdp_rel_v2')
 
 class C642NonGovGrants(db.Model, AuditMixin):
     __tablename__ = 'c642_non_gov_grants'
     id = db.Column(db.Integer, primary_key=True)
-    year = db.Column(db.Integer, nullable=False)
+    year = db.Column(db.String(20), nullable=True)
     agency_name = db.Column(db.String(255), nullable=False)
     purpose = db.Column(db.Text, nullable=True)
     amount_received = db.Column(db.Numeric(12, 2), nullable=True)
@@ -676,7 +696,7 @@ class C642NonGovGrants(db.Model, AuditMixin):
 class C653QualityInitiatives(db.Model, AuditMixin):
     __tablename__ = 'c653_quality_initiatives'
     id = db.Column(db.Integer, primary_key=True)
-    year = db.Column(db.Integer, nullable=False)
+    year = db.Column(db.String(20), nullable=True)
     conferences_conducted = db.Column(db.Text, nullable=True)
     aaa_status = db.Column(db.Text, nullable=True)
     nirf_status = db.Column(db.Text, nullable=True)
@@ -713,3 +733,6 @@ C531_Sports_Awards = C531SportsAwards
 C533_Sports_Events = C533SportsEvents
 C632_Teacher_Financial = C632TeacherFinancial
 C634_Teacher_FDP = C634TeacherFDP
+C21_Students = C21Students
+C22_ReservedCategorySeats = C22ReservedCategorySeats
+

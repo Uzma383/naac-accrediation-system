@@ -4,7 +4,7 @@
 import { useState, useEffect } from "react";
 import Sidebar from "../../components/Sidebar";
 import Footer from "../../components/Footer";
-import { getRecords, addRecord, deleteRecord, getAcademicYears, getEventLevels, getAwardCategories } from "../../api/apiService";
+import { getRecords, addRecord, deleteRecord, getAcademicYears, getEventLevels, getAwardCategories, getExcelExportUrl } from "../../api/apiService";
 
 const emptyForm = () => ({
   year: "", award_name: "", event_level: "", team_individual: "",
@@ -12,12 +12,12 @@ const emptyForm = () => ({
 });
 
 export default function Criterion5_3_1() {
-  const [form, setForm]           = useState(emptyForm());
-  const [records, setRecords]     = useState([]);
-  const [loading, setLoading]     = useState(true);
-  const [alert, setAlert]         = useState(null);
-  const [yearOptions, setYearOptions]       = useState([]);
-  const [levelOptions, setLevelOptions]     = useState([]);
+  const [form, setForm] = useState(emptyForm());
+  const [records, setRecords] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [alert, setAlert] = useState(null);
+  const [yearOptions, setYearOptions] = useState([]);
+  const [levelOptions, setLevelOptions] = useState([]);
   const [categoryOptions, setCategoryOptions] = useState([]);
 
   useEffect(() => {
@@ -61,7 +61,7 @@ export default function Criterion5_3_1() {
             <p className="text-muted mb-0" style={{ fontSize: "0.78rem", textTransform: "uppercase", letterSpacing: 1 }}>Criteria 5</p>
             <h4>5.3.1: Awards/Medals for Outstanding Performance</h4>
           </div>
-          <button className="btn btn-success btn-sm fw-semibold">
+          <button className="btn btn-success btn-sm fw-semibold" onClick={() => window.open(getExcelExportUrl("5_3_1"), "_blank")}>
             <i className="bi bi-file-earmark-excel me-1"></i> Export Excel
           </button>
         </header>
@@ -86,34 +86,36 @@ export default function Criterion5_3_1() {
                   <select className="form-select" value={form.year} onChange={e => setForm({ ...form, year: e.target.value })}>
                     <option value="">Select Year</option>
                     {yearOptions.map(y => <option key={y} value={y}>{y}</option>)}
-                  </select>
-                </div>
+                  </select>                </div>
                 <div className="col-md-4">
-                  <label className="fw-bold">Name of Award</label>
+                  <label className="fw-bold">Name of the award/medal</label>
                   <input type="text" className="form-control" value={form.award_name}
                     onChange={e => setForm({ ...form, award_name: e.target.value })} />
                 </div>
-                <div className="col-md-2">
-                  <label className="fw-bold">Level</label>
+                <div className="col-md-3">
+                  <label className="fw-bold">University/State/National/International</label>
                   <select className="form-select" value={form.event_level} onChange={e => setForm({ ...form, event_level: e.target.value })}>
                     <option value="">Select Level</option>
                     {levelOptions.map(l => <option key={l.value} value={l.value}>{l.label}</option>)}
                   </select>
                 </div>
-                <div className="col-md-2">
-                  <label className="fw-bold">Category</label>
+                <div className="col-md-3">
+                  <label className="fw-bold">Team / Individual</label>
                   <select className="form-select" value={form.team_individual} onChange={e => setForm({ ...form, team_individual: e.target.value })}>
                     <option value="">Select Category</option>
                     {categoryOptions.map(c => <option key={c.value} value={c.value}>{c.label}</option>)}
                   </select>
                 </div>
-                <div className="col-md-4">
-                  <label className="fw-bold">Event Name</label>
-                  <input type="text" className="form-control" value={form.event_name}
-                    onChange={e => setForm({ ...form, event_name: e.target.value })} />
+                <div className="col-md-3">
+                  <label className="fw-bold">Sports/Cultural</label>
+                  <select className="form-select" value={form.event_name} onChange={e => setForm({ ...form, event_name: e.target.value })}>
+                    <option value="">Select Activity</option>
+                    <option value="Sports">Sports</option>
+                    <option value="Cultural">Cultural</option>
+                  </select>
                 </div>
-                <div className="col-md-4">
-                  <label className="fw-bold">Student Name</label>
+                <div className="col-md-5">
+                  <label className="fw-bold">Name of the student</label>
                   <input type="text" className="form-control" value={form.student_name}
                     onChange={e => setForm({ ...form, student_name: e.target.value })} />
                 </div>
@@ -136,8 +138,8 @@ export default function Criterion5_3_1() {
                   <table className="table table-hover bg-white border">
                     <thead className="table-dark">
                       <tr>
-                        <th>Year</th><th>Award Name</th><th>Level</th>
-                        <th>Category</th><th>Event</th><th>Student Name</th>
+                        <th>Year</th><th>Name of the award/medal</th><th>University/State/National/International</th>
+                        <th>Team / Individual</th><th>Sports/Cultural</th><th>Name of the student</th>
                         <th>Proof</th><th>Delete</th>
                       </tr>
                     </thead>

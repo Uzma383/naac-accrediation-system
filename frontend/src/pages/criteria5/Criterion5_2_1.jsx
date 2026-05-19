@@ -75,7 +75,6 @@ export default function Criterion5_2_1() {
             <i className="bi bi-file-earmark-excel me-1"></i> Export Excel
           </button>
         </header>
-
         <div className="container-fluid p-4 fade-in">
           {alert && (
             <div className={`alert alert-${alert.type} alert-dismissible d-flex align-items-center gap-2 shadow-sm`} style={{ borderRadius: 10 }}>
@@ -84,6 +83,12 @@ export default function Criterion5_2_1() {
               <button className="btn-close ms-auto" onClick={() => setAlert(null)}></button>
             </div>
           )}
+
+          <div className="alert alert-info border-0 shadow-sm mb-4" style={{ borderRadius: 12, background: "linear-gradient(135deg,#e0f2fe,#f0f9ff)" }}>
+            <div className="fw-bold mb-1" style={{ fontSize: "0.92rem", color: "#0369a1" }}>
+              5.2.1 Number of placement of outgoing students during the year
+            </div>
+          </div>
 
           <div className="card border-0 shadow-sm mb-4" style={{ borderRadius: 14 }}>
             <div className="card-body p-4">
@@ -99,26 +104,26 @@ export default function Criterion5_2_1() {
                       {yearOptions.map(y => <option key={y} value={y}>{y}</option>)}
                     </select>
                   </div>
-                  <div className="col-md-2">
-                    <label className="form-label-custom">Student Name</label>
+                  <div className="col-md-3">
+                    <label className="form-label-custom" style={{fontSize: "0.75rem"}}>Name of student placed and contact details</label>
                     <input type="text" className="form-control" value={row.student_name}
                       onChange={e => updateRow(idx, "student_name", e.target.value)} />
                   </div>
                   <div className="col-md-2">
-                    <label className="form-label-custom">Program</label>
+                    <label className="form-label-custom" style={{fontSize: "0.75rem"}}>Program graduated from</label>
                     <select className="form-select" value={row.program} onChange={e => updateRow(idx, "program", e.target.value)}>
                       <option value="">Select Program</option>
                       {programOptions.map(p => <option key={p.code} value={p.name}>{p.name}</option>)}
                     </select>
                   </div>
                   <div className="col-md-3">
-                    <label className="form-label-custom">Employer</label>
+                    <label className="form-label-custom" style={{fontSize: "0.75rem"}}>Name of the employer with contact details</label>
                     <input type="text" className="form-control" value={row.employer}
                       onChange={e => updateRow(idx, "employer", e.target.value)} />
                   </div>
                   <div className="col-md-2">
-                    <label className="form-label-custom">Package (LPA)</label>
-                    <input type="text" className="form-control" placeholder="e.g. 4.5"
+                    <label className="form-label-custom" style={{fontSize: "0.75rem"}}>Pay package at appointment</label>
+                    <input type="text" className="form-control" placeholder="e.g. 4.5 LPA"
                       value={row.package} onChange={e => updateRow(idx, "package", e.target.value)} />
                   </div>
                   <div className="col-md-1 d-flex align-items-end">
@@ -140,8 +145,11 @@ export default function Criterion5_2_1() {
                   <table className="table table-hover align-middle">
                     <thead className="table-dark">
                       <tr>
-                        <th>Year</th><th>Student Name</th><th>Program</th>
-                        <th>Employer</th><th>Package</th>
+                        <th>Year</th>
+                        <th>Name of student placed and contact details</th>
+                        <th>Program graduated from</th>
+                        <th>Name of the employer with contact details</th>
+                        <th>Pay package at appointment</th>
                         <th className="text-center">Actions</th>
                       </tr>
                     </thead>

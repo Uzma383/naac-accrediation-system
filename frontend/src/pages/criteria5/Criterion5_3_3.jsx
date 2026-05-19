@@ -4,20 +4,31 @@
 import { useState, useEffect } from "react";
 import Sidebar from "../../components/Sidebar";
 import Footer from "../../components/Footer";
-import { getRecords, addRecord, deleteRecord, getAcademicYears } from "../../api/apiService";
+import { getRecords, addRecord, deleteRecord, getExcelExportUrl } from "../../api/apiService";
 
-const emptyForm = () => ({ year: "", event_date: "", event_name: "" });
+const emptyForm = () => ({ event_date: "", event_name: "", student_name: "" });
+
+const formatDate = (dateStr) => {
+  if (!dateStr) return "";
+  const parts = dateStr.split('-');
+  if (parts.length === 3) {
+    if (parts[0].length === 4) {
+      return `${parts[2]}-${parts[1]}-${parts[0]}`;
+    }
+    return dateStr;
+  }
+  return dateStr;
+};
 
 export default function Criterion5_3_3() {
   const [form, setForm]           = useState(emptyForm());
   const [records, setRecords]     = useState([]);
   const [loading, setLoading]     = useState(true);
   const [alert, setAlert]         = useState(null);
-  const [yearOptions, setYearOptions] = useState([]);
 
   useEffect(() => {
-    Promise.all([getRecords("5_3_3"), getAcademicYears()])
-      .then(([recs, years]) => { setRecords(recs); setYearOptions(years); })
+    getRecords("5_3_3")
+      .then(recs => { setRecords(recs); })
       .finally(() => setLoading(false));
   }, []);
 
@@ -27,13 +38,15 @@ export default function Criterion5_3_3() {
   };
 
   const handleSave = async () => {
-    if (!form.year || !form.event_date || !form.event_name)
+    if (!form.event_date || !form.event_name || !form.student_name)
       return showAlert("All fields are required.", "danger");
     const result = await addRecord("5_3_3", form);
     if (result.success) {
       setRecords(prev => [...prev, result.data]);
       setForm(emptyForm());
       showAlert("Event added!");
+    } else {
+      showAlert(result.error || "Failed to add event.", "danger");
     }
   };
 
@@ -54,7 +67,7 @@ export default function Criterion5_3_3() {
             <h4>5.3.3: Average Number of Sports & Cultural Events Organized</h4>
           </div>
           <div className="d-flex gap-2">
-            <button className="btn btn-success btn-sm fw-semibold">
+            <button className="btn btn-success btn-sm fw-semibold" onClick={() => window.open(getExcelExportUrl("5_3_3"), "_blank")}>
               <i className="bi bi-file-earmark-excel me-1"></i> Export Excel
             </button>
           </div>
@@ -75,25 +88,23 @@ export default function Criterion5_3_3() {
                 <i className="bi bi-plus-circle me-2 text-danger"></i>Add Event
               </h6>
               <div className="row g-3">
-                <div className="col-md-2">
-                  <label className="form-label fw-bold small text-muted">Year</label>
-                  <select className="form-select" value={form.year} onChange={e => setForm({ ...form, year: e.target.value })}>
-                    <option value="">Select Year</option>
-                    {yearOptions.map(y => <option key={y} value={y}>{y}</option>)}
-                  </select>
-                </div>
                 <div className="col-md-3">
-                  <label className="form-label fw-bold small text-muted">Date of Event</label>
+                  <label className="form-label fw-bold small text-muted">Date of event/activity (DD-MM-YYYY)</label>
                   <input type="text" className="form-control" placeholder="DD-MM-YYYY"
                     value={form.event_date} onChange={e => setForm({ ...form, event_date: e.target.value })} />
                 </div>
                 <div className="col-md-5">
-                  <label className="form-label fw-bold small text-muted">Name of the Event</label>
+                  <label className="form-label fw-bold small text-muted">Name of the event/activity</label>
                   <input type="text" className="form-control" placeholder="Enter event title"
                     value={form.event_name} onChange={e => setForm({ ...form, event_name: e.target.value })} />
                 </div>
-                <div className="col-md-2 mt-3 d-flex align-items-end">
-                  <button className="btn btn-danger w-100 fw-bold" onClick={handleSave}>Add Event</button>
+                <div className="col-md-4">
+                  <label className="form-label fw-bold small text-muted">Name of the student participated</label>
+                  <input type="text" className="form-control" placeholder="Enter student name"
+                    value={form.student_name} onChange={e => setForm({ ...form, student_name: e.target.value })} />
+                </div>
+                <div className="col-md-12 text-end mt-3">
+                  <button className="btn btn-danger px-5 fw-bold" onClick={handleSave}>Add Event</button>
                 </div>
               </div>
             </div>
@@ -106,9 +117,9 @@ export default function Criterion5_3_3() {
                   <table className="table table-hover align-middle mb-0">
                     <thead className="table-dark">
                       <tr>
-                        <th style={{ width: "15%" }}>Year</th>
-                        <th style={{ width: "20%" }}>Date of Event</th>
-                        <th>Name of the Event</th>
+                        <th style={{ width: "25%" }}>Date of event/activity (DD-MM-YYYY)</th>
+                        <th style={{ width: "35%" }}>Name of the event/activity</th>
+                        <th>Name of the student participated</th>
                         <th className="text-center" style={{ width: "10%" }}>Action</th>
                       </tr>
                     </thead>
@@ -117,9 +128,9 @@ export default function Criterion5_3_3() {
                         <tr><td colSpan={4} className="text-center py-4 text-muted">No records found. Add an event to get started.</td></tr>
                       ) : records.map(row => (
                         <tr key={row.id}>
-                          <td className="fw-bold">{row.year}</td>
-                          <td>{row.event_date}</td>
+                          <td>{formatDate(row.event_date)}</td>
                           <td>{row.event_name}</td>
+                          <td>{row.student_name}</td>
                           <td className="text-center">
                             <button className="btn btn-sm btn-outline-danger" onClick={() => handleDelete(row.id)}>
                               <i className="bi bi-trash"></i>

@@ -1,8 +1,19 @@
+import { useEffect } from "react";
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import Home             from "./pages/Home";
 import Login            from "./pages/Login";
 import Register         from "./pages/Register";
 import Dashboard        from "./pages/Dashboard";
+
+// Helper to extract criterion code from pathname
+const getCriterionFromPath = (pathname) => {
+  const parts = pathname.split('/');
+  const last = parts[parts.length - 1];
+  if (/^\d+(-\d+)*$/.test(last)) {
+    return last.replace(/-/g, '_');
+  }
+  return null;
+};
 
 // Criteria 1
 import Criterion1_1   from "./pages/criteria1/Criterion1_1";
@@ -59,6 +70,23 @@ import Criterion6_4_2 from "./pages/criteria6/Criterion6_4_2";
 import Criterion6_5_3 from "./pages/criteria6/Criterion6_5_3";
 
 export default function App() {
+  useEffect(() => {
+    const handleGlobalClick = (e) => {
+      const btn = e.target.closest('button');
+      if (btn && btn.textContent.toLowerCase().includes('export excel')) {
+        const criterion = getCriterionFromPath(window.location.pathname);
+        if (criterion) {
+          e.preventDefault();
+          e.stopPropagation();
+          const BASE_URL = "http://localhost:5000/api";
+          window.open(`${BASE_URL}/export-excel/${criterion}`, "_blank");
+        }
+      }
+    };
+    document.addEventListener('click', handleGlobalClick, true);
+    return () => document.removeEventListener('click', handleGlobalClick, true);
+  }, []);
+
   return (
     <BrowserRouter>
       <Routes>

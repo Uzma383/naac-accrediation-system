@@ -4,9 +4,9 @@
 import { useState, useEffect } from "react";
 import Sidebar from "../../components/Sidebar";
 import Footer from "../../components/Footer";
-import { getRecords, addRecord, deleteRecord, getAcademicYears } from "../../api/apiService";
+import { getRecords, addRecord, deleteRecord, getAcademicYears, uploadEvidence, getExcelExportUrl } from "../../api/apiService";
 
-const emptyForm = () => ({ year: "", scheme_name: "", date_impl: "", num_students: "", agencies: "", document: null });
+const emptyForm = () => ({ scheme_name: "", date_impl: "", num_students: "", agencies: "", document: null });
 
 export default function Criterion5_1_3() {
   const [rows, setRows]           = useState([emptyForm()]);
@@ -34,18 +34,32 @@ export default function Criterion5_1_3() {
   const removeRow = (idx) => setRows(prev => prev.filter((_, i) => i !== idx));
 
   const handleSave = async () => {
-    const valid = rows.filter(r => r.year && r.scheme_name && r.date_impl && r.num_students && r.agencies);
+    const valid = rows.filter(r => r.scheme_name && r.date_impl && r.num_students && r.agencies);
     if (!valid.length) return showAlert("Please fill all required fields in at least one row.", "danger");
     for (const row of valid) {
-      const result = await addRecord("5_1_3", {
-        year: row.year, scheme_name: row.scheme_name,
-        implementation_year: row.date_impl,
-        num_students_enrolled: row.num_students, agencies_involved: row.agencies
-      });
-      if (result.success) setRecords(prev => [...prev, result.data]);
+      const payload = {
+        program_name: row.scheme_name,
+        implementation_date: row.date_impl,
+        students_enrolled: row.num_students,
+        agencies_involved: row.agencies
+      };
+      const result = await addRecord("5_1_3", payload);
+      if (result.success) {
+        if (row.document) {
+          const uploadRes = await uploadEvidence("5_1_3", [row.document], result.data.id);
+          if (uploadRes.success && uploadRes.file_urls && uploadRes.file_urls.length > 0) {
+            result.data.proof_links = (result.data.proof_links ? result.data.proof_links + "," : "") + uploadRes.file_urls.join(",");
+          }
+        }
+        setRecords(prev => [...prev, result.data]);
+      }
     }
     setRows([emptyForm()]);
     showAlert(`${valid.length} record(s) saved successfully!`);
+  };
+
+  const handleExport = () => {
+    window.open(getExcelExportUrl("5_1_3"), "_blank");
   };
 
   const handleDelete = async (id) => {
@@ -66,7 +80,7 @@ export default function Criterion5_1_3() {
             <p className="text-muted mb-0" style={{ fontSize: "0.78rem", textTransform: "uppercase", letterSpacing: 1 }}>Criteria 5</p>
             <h4>5.1.3: Capacity Building & Skills Enhancement</h4>
           </div>
-          <button className="btn btn-success btn-sm fw-semibold">
+          <button className="btn btn-success btn-sm fw-semibold" onClick={handleExport}>
             <i className="bi bi-file-earmark-excel me-1"></i> Export Excel
           </button>
         </header>
@@ -80,6 +94,13 @@ export default function Criterion5_1_3() {
             </div>
           )}
 
+          <div className="alert alert-info border-0 shadow-sm mb-4" style={{ borderRadius: 12, background: "linear-gradient(135deg,#e0f2fe,#f0f9ff)" }}>
+            <div className="fw-bold mb-1" style={{ fontSize: "0.92rem", color: "#0369a1" }}>
+              5.1.3 Capacity building and skills enhancement initiatives taken by the institution include the following<br/>
+              <span className="fw-normal">1. Soft skills, 2. Language and communication skills, 3. Life skills (Yoga, physical fitness, health and hygiene), 4. ICT/computing skills</span>
+            </div>
+          </div>
+
           <div className="card border-0 shadow-sm mb-4" style={{ borderRadius: 14 }}>
             <div className="card-body p-4">
               <h6 className="fw-bold text-uppercase mb-3" style={{ fontSize: "0.78rem", letterSpacing: 1, color: "#888" }}>
@@ -87,40 +108,33 @@ export default function Criterion5_1_3() {
               </h6>
               {rows.map((row, idx) => (
                 <div key={idx} className="row g-2 mb-3 p-3 border rounded bg-light align-items-end">
-                  <div className="col-md-2">
-                    <label className="form-label-custom">Year</label>
-                    <select className="form-select" value={row.year} onChange={e => updateRow(idx, "year", e.target.value)}>
-                      <option value="">Select Year</option>
-                      {yearOptions.map(y => <option key={y} value={y}>{y}</option>)}
-                    </select>
-                  </div>
                   <div className="col-md-3">
-                    <label className="form-label-custom">Name of Program</label>
+                    <label className="form-label-custom" style={{fontSize:"0.8rem"}}>Name of the capability enhancement program</label>
                     <input type="text" className="form-control" placeholder="Soft Skills, Communication..."
                       value={row.scheme_name} onChange={e => updateRow(idx, "scheme_name", e.target.value)} />
                   </div>
                   <div className="col-md-2">
-                    <label className="form-label-custom">Date (DD-MM-YYYY)</label>
+                    <label className="form-label-custom" style={{fontSize:"0.8rem"}}>Date of implementation (DD-MM-YYYY)</label>
                     <input type="text" className="form-control" placeholder="15-08-2024"
                       value={row.date_impl} onChange={e => updateRow(idx, "date_impl", e.target.value)} />
                   </div>
                   <div className="col-md-2">
-                    <label className="form-label-custom">Students Enrolled</label>
+                    <label className="form-label-custom" style={{fontSize:"0.8rem"}}>Number of students enrolled</label>
                     <input type="number" className="form-control" placeholder="60"
                       value={row.num_students} onChange={e => updateRow(idx, "num_students", e.target.value)} />
                   </div>
-                  <div className="col-md-2">
-                    <label className="form-label-custom">Agencies Involved</label>
+                  <div className="col-md-3">
+                    <label className="form-label-custom" style={{fontSize:"0.8rem"}}>Name of the agencies/consultants involved with contact details (if any)</label>
                     <input type="text" className="form-control" placeholder="Agency Name"
                       value={row.agencies} onChange={e => updateRow(idx, "agencies", e.target.value)} />
                   </div>
-                  <div className="col-md-1 d-flex align-items-end">
-                    <button className="btn btn-outline-danger w-100" onClick={() => removeRow(idx)}>×</button>
-                  </div>
-                  <div className="col-md-4">
-                    <label className="form-label-custom">Evidence (PDF)</label>
-                    <input type="file" className="form-control form-control-sm" accept=".pdf"
-                      onChange={e => updateRow(idx, "document", e.target.files[0])} />
+                  <div className="col-md-2">
+                    <label className="form-label-custom" style={{fontSize:"0.8rem"}}>Evidence (PDF)</label>
+                    <div className="d-flex gap-2">
+                      <input type="file" className="form-control form-control-sm" accept=".pdf"
+                        onChange={e => updateRow(idx, "document", e.target.files[0])} />
+                      <button className="btn btn-sm btn-outline-danger" onClick={() => removeRow(idx)}>×</button>
+                    </div>
                   </div>
                 </div>
               ))}
@@ -138,23 +152,25 @@ export default function Criterion5_1_3() {
                   <table className="table table-hover align-middle">
                     <thead className="table-dark">
                       <tr>
-                        <th>Year</th><th>Program Name</th><th>Date</th>
-                        <th>Enrolled</th><th>Agencies</th>
-                        <th className="text-center">Evidence</th>
-                        <th className="text-center">Actions</th>
+                        <th style={{ width: '25%' }}>Name of the capability enhancement program</th>
+                        <th style={{ width: '15%' }}>Date of implementation<br/><small>(DD-MM-YYYY)</small></th>
+                        <th style={{ width: '15%' }}>Number of students enrolled</th>
+                        <th style={{ width: '25%' }}>Name of the agencies/consultants involved with contact details (if any)</th>
+                        <th className="text-center" style={{ width: '10%' }}>Evidence</th>
+                        <th className="text-center" style={{ width: '10%' }}>Actions</th>
                       </tr>
                     </thead>
                     <tbody>
                       {records.length === 0 ? (
-                        <tr><td colSpan={7} className="text-center text-muted py-4">No records found for Criteria 5.1.3.</td></tr>
+                        <tr><td colSpan={6} className="text-center text-muted py-4">No records found for Criteria 5.1.3.</td></tr>
                       ) : records.map(row => (
                         <tr key={row.id}>
-                          <td>{row.year}</td><td>{row.scheme_name}</td>
-                          <td>{row.implementation_year}</td>
-                          <td>{row.num_students_enrolled}</td>
+                          <td>{row.program_name}</td>
+                          <td>{row.implementation_date}</td>
+                          <td>{row.students_enrolled}</td>
                           <td>{row.agencies_involved}</td>
                           <td className="text-center">
-                            {row.pdf_path && <a href={row.pdf_path} target="_blank" rel="noreferrer" className="text-danger"><i className="bi bi-file-earmark-pdf fs-5"></i></a>}
+                            {row.proof_links && <a href={row.proof_links.startsWith('http') ? row.proof_links : `http://localhost:5000${row.proof_links.startsWith('/') ? '' : '/'}${row.proof_links}`} target="_blank" rel="noreferrer" className="text-danger"><i className="bi bi-file-earmark-pdf fs-5"></i></a>}
                           </td>
                           <td className="text-center">
                             <button className="btn btn-sm btn-outline-danger" onClick={() => handleDelete(row.id)}><i className="bi bi-trash"></i></button>
