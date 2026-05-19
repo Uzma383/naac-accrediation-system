@@ -3,7 +3,7 @@ import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import Sidebar from "../../components/Sidebar";
 import Footer from "../../components/Footer";
-import { getTeachers, getAcademicYears, getRecords, addRecord, updateRecord, deleteRecord } from "../../api/apiService";
+import { getTeachers, getAcademicYears, getRecords, addRecord, updateRecord, deleteRecord, getExcelExportUrl } from "../../api/apiService";
 
 const GENDER_OPTIONS = ["Male", "Female", "Other"];
 const DESIGNATION_OPTIONS = ["Assistant Professor", "Associate Professor", "Professor", "HOD", "Director", "Principal", "Lab Assistant", "Other"];
@@ -62,7 +62,7 @@ export default function Criterion3_1() {
             <p className="text-muted mb-0" style={{ fontSize: "0.78rem", textTransform: "uppercase", letterSpacing: 1 }}>Criteria 3</p>
             <h4>3.1: Number of Full-Time Teachers During the Year</h4>
           </div>
-          <button className="btn btn-success btn-sm fw-semibold" onClick={() => navigate("/export/3-1")}>
+          <button className="btn btn-success btn-sm fw-semibold" onClick={() => window.open(getExcelExportUrl('3_1'), '_blank')}>
             <i className="bi bi-file-earmark-excel me-1"></i> Export Excel
           </button>
         </header>

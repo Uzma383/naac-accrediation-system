@@ -865,4 +865,510 @@ def delete_132(prog_code, course_code, year):
     flash(f"Deleted course {course_code} data.", "success")
     return redirect(url_for('main.criterion1_3_2'))
 
+# ==================== CRITERIA 3 & 4 (LEGACY ROUTES) ====================
+
+@main.route('/criteria/3')
+def criteria_3():
+    if 'user_id' not in session: return redirect(url_for('main.home'))
+    return render_template('criteria3.html')
+
+# ==================== CRITERIA 3.1 ====================
+@main.route('/criteria/3.1')
+def criteria_3_1():
+    if 'user_id' not in session: return redirect(url_for('main.home'))
+    return render_template('criteria3_1.html', data=C3FullTimeTeachers.query.all())
+
+@main.route('/add_31', methods=['POST'])
+def add_31():
+    if 'user_id' not in session: return redirect(url_for('main.home'))
+    t_id = request.form.get('teacher_id')
+    ay = request.form.get('academic_year')
+    posts = request.form.get('sanctioned_posts')
+    if t_id and ay:
+        db.session.add(C3FullTimeTeachers(teacher_id=t_id, academic_year=ay, sanctioned_posts=posts))
+        db.session.commit()
+    return redirect(url_for('main.criteria_3_1'))
+
+@main.route('/delete_31/<int:id>')
+def delete_31(id):
+    rec = C3FullTimeTeachers.query.get_or_404(id); db.session.delete(rec); db.session.commit()
+    return redirect(url_for('main.criteria_3_1'))
+
+@main.route('/export_31_excel')
+def export_31_excel():
+    if 'user_id' not in session: return redirect(url_for('main.home'))
+    records = C3FullTimeTeachers.query.all()
+    wb = Workbook(); ws = wb.active; ws.title = 'C3.1'
+    ws.merge_cells('A1:C1'); ws['A1'] = '3.1 Full-Time Teachers'
+    for col, h in enumerate(['Teacher ID', 'Academic Year', 'Sanctioned Posts'], 1):
+        style_header_cell(ws.cell(row=2, column=col, value=h))
+    for r, rec in enumerate(records, 3):
+        style_data_cell(ws.cell(row=r, column=1, value=rec.teacher_id))
+        style_data_cell(ws.cell(row=r, column=2, value=rec.academic_year))
+        style_data_cell(ws.cell(row=r, column=3, value=rec.sanctioned_posts))
+    out = io.BytesIO(); wb.save(out); out.seek(0)
+    return send_file(out, download_name='Criteria_3_1.xlsx', as_attachment=True)
+
+# ==================== CRITERIA 3.2 ====================
+@main.route('/criteria/3.2')
+def criteria_3_2():
+    if 'user_id' not in session: return redirect(url_for('main.home'))
+    return render_template('criteria3_2.html', data=C3SanctionedPosts.query.all())
+
+@main.route('/add_32', methods=['POST'])
+def add_32():
+    if 'user_id' not in session: return redirect(url_for('main.home'))
+    year = request.form.get('year')
+    count = request.form.get('sanctioned_posts_count')
+    doc = request.form.get('supporting_document')
+    if year:
+        db.session.add(C3SanctionedPosts(year=year, sanctioned_posts_count=count, supporting_document=doc))
+        db.session.commit()
+    return redirect(url_for('main.criteria_3_2'))
+
+@main.route('/delete_32/<int:id>')
+def delete_32(id):
+    rec = C3SanctionedPosts.query.get_or_404(id); db.session.delete(rec); db.session.commit()
+    return redirect(url_for('main.criteria_3_2'))
+
+@main.route('/export_32_excel')
+def export_32_excel():
+    if 'user_id' not in session: return redirect(url_for('main.home'))
+    records = C3SanctionedPosts.query.all()
+    wb = Workbook(); ws = wb.active; ws.title = 'C3.2'
+    ws.merge_cells('A1:C1'); ws['A1'] = '3.2 Sanctioned Posts'
+    for col, h in enumerate(['Year', 'Posts Count', 'Document'], 1):
+        style_header_cell(ws.cell(row=2, column=col, value=h))
+    for r, rec in enumerate(records, 3):
+        style_data_cell(ws.cell(row=r, column=1, value=rec.year))
+        style_data_cell(ws.cell(row=r, column=2, value=rec.sanctioned_posts_count))
+        style_data_cell(ws.cell(row=r, column=3, value=rec.supporting_document))
+    out = io.BytesIO(); wb.save(out); out.seek(0)
+    return send_file(out, download_name='Criteria_3_2.xlsx', as_attachment=True)
+
+
+
+# ==================== CRITERIA 3.1.1 & 3.1.2 ====================
+@main.route('/criteria/3.1.1_2')
+def criteria_3_1_1_2():
+    if 'user_id' not in session: return redirect(url_for('main.home'))
+    return render_template('criteria3_1_1.html', data=C3ResearchProjects.query.all())
+
+@main.route('/add_3112', methods=['POST'])
+def add_3112():
+    if 'user_id' not in session: return redirect(url_for('main.home'))
+    name = request.form.get('project_name')
+    if name:
+        db.session.add(C3ResearchProjects(
+            project_name=name, co_investigator=request.form.get('co_investigator'),
+            department=request.form.get('department'), year_of_award=request.form.get('year_of_award'),
+            amount_sanctioned=request.form.get('amount_sanctioned'), duration=request.form.get('duration'),
+            funding_agency=request.form.get('funding_agency'), funding_type=request.form.get('funding_type')
+        ))
+        db.session.commit()
+    return redirect(url_for('main.criteria_3_1_1_2'))
+
+@main.route('/delete_3112/<int:id>')
+def delete_3112(id):
+    rec = C3ResearchProjects.query.get_or_404(id); db.session.delete(rec); db.session.commit()
+    return redirect(url_for('main.criteria_3_1_1_2'))
+
+@main.route('/export_3112_excel')
+def export_3112_excel():
+    if 'user_id' not in session: return redirect(url_for('main.home'))
+    records = C3ResearchProjects.query.all()
+    wb = Workbook(); ws = wb.active; ws.title = 'C3.1.1 & 3.1.2'
+    ws.merge_cells('A1:G1'); ws['A1'] = '3.1.1 & 3.1.2 Research Projects'
+    for col, h in enumerate(['Project Name', 'Co-Investigator', 'Department', 'Year', 'Amount', 'Duration', 'Agency', 'Type'], 1):
+        style_header_cell(ws.cell(row=2, column=col, value=h))
+    for r, rec in enumerate(records, 3):
+        for i, val in enumerate([rec.project_name, rec.co_investigator, rec.department, rec.year_of_award, rec.amount_sanctioned, rec.duration, rec.funding_agency, rec.funding_type], 1):
+            style_data_cell(ws.cell(row=r, column=i, value=val))
+    out = io.BytesIO(); wb.save(out); out.seek(0)
+    return send_file(out, download_name='Criteria_3_1_1_2.xlsx', as_attachment=True)
+
+# ==================== CRITERIA 3.1.3 ====================
+@main.route('/criteria/3.1.3')
+def criteria_3_1_3():
+    if 'user_id' not in session: return redirect(url_for('main.home'))
+    return render_template('criteria3_1_3.html', data=C313Events.query.all())
+
+@main.route('/add_313', methods=['POST'])
+def add_313():
+    if 'user_id' not in session: return redirect(url_for('main.home'))
+    name = request.form.get('event_name')
+    if name:
+        db.session.add(C313Events(
+            year=request.form.get('year'), event_name=name,
+            participant_count=request.form.get('participant_count'),
+            activity_report_link=request.form.get('activity_report_link')
+        ))
+        db.session.commit()
+    return redirect(url_for('main.criteria_3_1_3'))
+
+@main.route('/delete_313/<int:id>')
+def delete_313(id):
+    rec = C313Events.query.get_or_404(id); db.session.delete(rec); db.session.commit()
+    return redirect(url_for('main.criteria_3_1_3'))
+
+@main.route('/export_313_excel')
+def export_313_excel():
+    if 'user_id' not in session: return redirect(url_for('main.home'))
+    records = C313Events.query.all()
+    wb = Workbook(); ws = wb.active; ws.title = 'C3.1.3'
+    ws.merge_cells('A1:D1'); ws['A1'] = '3.1.3 Seminars and Conferences'
+    for col, h in enumerate(['Year', 'Event Name', 'Participants', 'Report Link'], 1):
+        style_header_cell(ws.cell(row=2, column=col, value=h))
+    for r, rec in enumerate(records, 3):
+        for i, val in enumerate([rec.year, rec.event_name, rec.participant_count, rec.activity_report_link], 1):
+            style_data_cell(ws.cell(row=r, column=i, value=val))
+    out = io.BytesIO(); wb.save(out); out.seek(0)
+    return send_file(out, download_name='Criteria_3_1_3.xlsx', as_attachment=True)
+
+# ==================== CRITERIA 3.2.1 ====================
+@main.route('/criteria/3.2.1')
+def criteria_3_2_1():
+    if 'user_id' not in session: return redirect(url_for('main.home'))
+    return render_template('criteria3_2_1.html', data=C321Papers.query.all())
+
+@main.route('/add_321', methods=['POST'])
+def add_321():
+    if 'user_id' not in session: return redirect(url_for('main.home'))
+    title = request.form.get('paper_title')
+    if title:
+        db.session.add(C321Papers(
+            paper_title=title, author_names=request.form.get('author_names'),
+            department=request.form.get('department'), journal_name=request.form.get('journal_name'),
+            year_of_publication=request.form.get('year_of_publication'), issn=request.form.get('issn'),
+            ugc_recognition_link=request.form.get('ugc_recognition_link')
+        ))
+        db.session.commit()
+    return redirect(url_for('main.criteria_3_2_1'))
+
+@main.route('/delete_321/<int:id>')
+def delete_321(id):
+    rec = C321Papers.query.get_or_404(id); db.session.delete(rec); db.session.commit()
+    return redirect(url_for('main.criteria_3_2_1'))
+
+@main.route('/export_321_excel')
+def export_321_excel():
+    if 'user_id' not in session: return redirect(url_for('main.home'))
+    records = C321Papers.query.all()
+    wb = Workbook(); ws = wb.active; ws.title = 'C3.2.1'
+    ws.merge_cells('A1:G1'); ws['A1'] = '3.2.1 Papers Published'
+    for col, h in enumerate(['Title', 'Authors', 'Department', 'Journal', 'Year', 'ISSN', 'Link'], 1):
+        style_header_cell(ws.cell(row=2, column=col, value=h))
+    for r, rec in enumerate(records, 3):
+        for i, val in enumerate([rec.paper_title, rec.author_names, rec.department, rec.journal_name, rec.year_of_publication, rec.issn, rec.ugc_recognition_link], 1):
+            style_data_cell(ws.cell(row=r, column=i, value=val))
+    out = io.BytesIO(); wb.save(out); out.seek(0)
+    return send_file(out, download_name='Criteria_3_2_1.xlsx', as_attachment=True)
+
+# ==================== CRITERIA 3.2.2 ====================
+@main.route('/criteria/3.2.2')
+def criteria_3_2_2():
+    if 'user_id' not in session: return redirect(url_for('main.home'))
+    return render_template('criteria3_2_2.html', data=C322Books.query.all())
+
+@main.route('/add_322', methods=['POST'])
+def add_322():
+    if 'user_id' not in session: return redirect(url_for('main.home'))
+    title = request.form.get('book_title')
+    t_id = request.form.get('teacher_id')
+    if title and t_id:
+        db.session.add(C322Books(
+            teacher_id=t_id, book_title=title, chapter_title=title, paper_title=request.form.get('paper_title'),
+            conference_name=request.form.get('conference_name'), proceedings_title=request.form.get('proceedings_title'),
+            level=request.form.get('level'), year_of_publication=request.form.get('year_of_publication'),
+            isbn_issn=request.form.get('isbn_issn'), affiliating_institute=request.form.get('affiliating_institute'),
+            publisher=request.form.get('publisher')
+        ))
+        db.session.commit()
+    return redirect(url_for('main.criteria_3_2_2'))
+
+@main.route('/delete_322/<int:id>')
+def delete_322(id):
+    rec = C322Books.query.get_or_404(id); db.session.delete(rec); db.session.commit()
+    return redirect(url_for('main.criteria_3_2_2'))
+
+@main.route('/export_322_excel')
+def export_322_excel():
+    if 'user_id' not in session: return redirect(url_for('main.home'))
+    records = C322Books.query.all()
+    wb = Workbook(); ws = wb.active; ws.title = 'C3.2.2'
+    ws.merge_cells('A1:J1'); ws['A1'] = '3.2.2 Books and Chapters'
+    for col, h in enumerate(['Teacher', 'Book Title', 'Paper', 'Conference', 'Proceedings', 'Level', 'Year', 'ISBN', 'Institute', 'Publisher'], 1):
+        style_header_cell(ws.cell(row=2, column=col, value=h))
+    for r, rec in enumerate(records, 3):
+        tname = rec.teacher.name if rec.teacher else ''
+        for i, val in enumerate([tname, rec.book_title, rec.paper_title, rec.conference_name, rec.proceedings_title, rec.level, rec.year_of_publication, rec.isbn_issn, rec.affiliating_institute, rec.publisher], 1):
+            style_data_cell(ws.cell(row=r, column=i, value=val))
+    out = io.BytesIO(); wb.save(out); out.seek(0)
+    return send_file(out, download_name='Criteria_3_2_2.xlsx', as_attachment=True)
+
+# ==================== CRITERIA 3.3.2 ====================
+@main.route('/criteria/3.3.2')
+def criteria_3_3_2():
+    if 'user_id' not in session: return redirect(url_for('main.home'))
+    return render_template('criteria3_3_2.html', data=C332ExtensionAwards.query.all())
+
+@main.route('/add_332', methods=['POST'])
+def add_332():
+    if 'user_id' not in session: return redirect(url_for('main.home'))
+    name = request.form.get('activity_name')
+    if name:
+        db.session.add(C332ExtensionAwards(
+            activity_name=name, award_name=request.form.get('award_name'),
+            awarding_body=request.form.get('awarding_body'), award_year=request.form.get('award_year')
+        ))
+        db.session.commit()
+    return redirect(url_for('main.criteria_3_3_2'))
+
+@main.route('/delete_332/<int:id>')
+def delete_332(id):
+    rec = C332ExtensionAwards.query.get_or_404(id); db.session.delete(rec); db.session.commit()
+    return redirect(url_for('main.criteria_3_3_2'))
+
+@main.route('/export_332_excel')
+def export_332_excel():
+    if 'user_id' not in session: return redirect(url_for('main.home'))
+    records = C332ExtensionAwards.query.all()
+    wb = Workbook(); ws = wb.active; ws.title = 'C3.3.2'
+    ws.merge_cells('A1:D1'); ws['A1'] = '3.3.2 Extension Awards'
+    for col, h in enumerate(['Activity', 'Award', 'Body', 'Year'], 1):
+        style_header_cell(ws.cell(row=2, column=col, value=h))
+    for r, rec in enumerate(records, 3):
+        for i, val in enumerate([rec.activity_name, rec.award_name, rec.awarding_body, rec.award_year], 1):
+            style_data_cell(ws.cell(row=r, column=i, value=val))
+    out = io.BytesIO(); wb.save(out); out.seek(0)
+    return send_file(out, download_name='Criteria_3_3_2.xlsx', as_attachment=True)
+
+# ==================== CRITERIA 3.3.3 & 3.3.4 ====================
+@main.route('/criteria/3.3.3_4')
+def criteria_3_3_3_4():
+    if 'user_id' not in session: return redirect(url_for('main.home'))
+    return render_template('criteria3_3_3.html', data=C333Outreach.query.all())
+
+@main.route('/add_3334', methods=['POST'])
+def add_3334():
+    if 'user_id' not in session: return redirect(url_for('main.home'))
+    name = request.form.get('activity_name')
+    if name:
+        db.session.add(C333Outreach(
+            activity_name=name, agency_name=request.form.get('agency_name'),
+            scheme_name=request.form.get('scheme_name'), year=request.form.get('year'),
+            students_participated=request.form.get('students_participated')
+        ))
+        db.session.commit()
+    return redirect(url_for('main.criteria_3_3_3_4'))
+
+@main.route('/delete_3334/<int:id>')
+def delete_3334(id):
+    rec = C333Outreach.query.get_or_404(id); db.session.delete(rec); db.session.commit()
+    return redirect(url_for('main.criteria_3_3_3_4'))
+
+@main.route('/export_3334_excel')
+def export_3334_excel():
+    if 'user_id' not in session: return redirect(url_for('main.home'))
+    records = C333Outreach.query.all()
+    wb = Workbook(); ws = wb.active; ws.title = 'C3.3.3 & 3.3.4'
+    ws.merge_cells('A1:E1'); ws['A1'] = '3.3.3 & 3.3.4 Extension Activities'
+    for col, h in enumerate(['Activity', 'Agency', 'Scheme', 'Year', 'Students'], 1):
+        style_header_cell(ws.cell(row=2, column=col, value=h))
+    for r, rec in enumerate(records, 3):
+        for i, val in enumerate([rec.activity_name, rec.agency_name, rec.scheme_name, rec.year, rec.students_participated], 1):
+            style_data_cell(ws.cell(row=r, column=i, value=val))
+    out = io.BytesIO(); wb.save(out); out.seek(0)
+    return send_file(out, download_name='Criteria_3_3_3_4.xlsx', as_attachment=True)
+
+# ==================== CRITERIA 3.4.1 ====================
+@main.route('/criteria/3.4.1')
+def criteria_3_4_1():
+    if 'user_id' not in session: return redirect(url_for('main.home'))
+    return render_template('criteria3_4_1.html', data=C341Collaborations.query.all())
+
+@main.route('/add_341', methods=['POST'])
+def add_341():
+    if 'user_id' not in session: return redirect(url_for('main.home'))
+    title = request.form.get('activity_title')
+    if title:
+        db.session.add(C341Collaborations(
+            activity_title=title, agency_name=request.form.get('agency_name'),
+            participant_name=request.form.get('participant_name'), year=request.form.get('year'),
+            duration=request.form.get('duration'), nature_of_activity=request.form.get('nature_of_activity'),
+            proof_links=request.form.get('proof_link')
+        ))
+        db.session.commit()
+    return redirect(url_for('main.criteria_3_4_1'))
+
+@main.route('/delete_341/<int:id>')
+def delete_341(id):
+    rec = C341Collaborations.query.get_or_404(id); db.session.delete(rec); db.session.commit()
+    return redirect(url_for('main.criteria_3_4_1'))
+
+@main.route('/export_341_excel')
+def export_341_excel():
+    if 'user_id' not in session: return redirect(url_for('main.home'))
+    records = C341Collaborations.query.all()
+    wb = Workbook(); ws = wb.active; ws.title = 'C3.4.1'
+    ws.merge_cells('A1:G1'); ws['A1'] = '3.4.1 Collaborations'
+    for col, h in enumerate(['Title', 'Agency', 'Participant', 'Year', 'Duration', 'Nature', 'Proof Link'], 1):
+        style_header_cell(ws.cell(row=2, column=col, value=h))
+    for r, rec in enumerate(records, 3):
+        for i, val in enumerate([rec.activity_title, rec.agency_name, rec.participant_name, rec.year, rec.duration, rec.nature_of_activity, rec.proof_links], 1):
+            style_data_cell(ws.cell(row=r, column=i, value=val))
+    out = io.BytesIO(); wb.save(out); out.seek(0)
+    return send_file(out, download_name='Criteria_3_4_1.xlsx', as_attachment=True)
+
+# ==================== CRITERIA 3.4.2 ====================
+@main.route('/criteria/3.4.2')
+def criteria_3_4_2():
+    if 'user_id' not in session: return redirect(url_for('main.home'))
+    return render_template('criteria3_4_2.html', data=C342MoUs.query.all())
+
+@main.route('/add_342', methods=['POST'])
+def add_342():
+    if 'user_id' not in session: return redirect(url_for('main.home'))
+    org = request.form.get('organisation_name')
+    if org:
+        db.session.add(C342MoUs(
+            organisation_name=org, institution_name=request.form.get('institution_name'),
+            signing_year=request.form.get('signing_year'), duration=request.form.get('duration'),
+            activities_list=request.form.get('activities_list'), participant_count=request.form.get('participant_count')
+        ))
+        db.session.commit()
+    return redirect(url_for('main.criteria_3_4_2'))
+
+@main.route('/delete_342/<int:id>')
+def delete_342(id):
+    rec = C342MoUs.query.get_or_404(id); db.session.delete(rec); db.session.commit()
+    return redirect(url_for('main.criteria_3_4_2'))
+
+@main.route('/export_342_excel')
+def export_342_excel():
+    if 'user_id' not in session: return redirect(url_for('main.home'))
+    records = C342MoUs.query.all()
+    wb = Workbook(); ws = wb.active; ws.title = 'C3.4.2'
+    ws.merge_cells('A1:F1'); ws['A1'] = '3.4.2 Functional MoUs'
+    for col, h in enumerate(['Organisation', 'Institution', 'Year', 'Duration', 'Activities', 'Participants'], 1):
+        style_header_cell(ws.cell(row=2, column=col, value=h))
+    for r, rec in enumerate(records, 3):
+        for i, val in enumerate([rec.organisation_name, rec.institution_name, rec.signing_year, rec.duration, rec.activities_list, rec.participant_count], 1):
+            style_data_cell(ws.cell(row=r, column=i, value=val))
+    out = io.BytesIO(); wb.save(out); out.seek(0)
+    return send_file(out, download_name='Criteria_3_4_2.xlsx', as_attachment=True)
+
+# ==================== CRITERIA 4.1.3 ====================
+@main.route('/criteria/4.1.3')
+def criteria_4_1_3():
+    if 'user_id' not in session: return redirect(url_for('main.home'))
+    return render_template('criteria4_1_3.html', data=C413ICTRooms.query.all())
+
+@main.route('/add_413', methods=['POST'])
+def add_413():
+    if 'user_id' not in session: return redirect(url_for('main.home'))
+    room = request.form.get('room_number')
+    facs = request.form.get('facilities')
+    if room:
+        db.session.add(C413ICTRooms(room_number=room, facilities=facs))
+        db.session.commit()
+    return redirect(url_for('main.criteria_4_1_3'))
+
+@main.route('/delete_413/<int:id>')
+def delete_413(id):
+    rec = C413ICTRooms.query.get_or_404(id); db.session.delete(rec); db.session.commit()
+    return redirect(url_for('main.criteria_4_1_3'))
+
+@main.route('/export_413_excel')
+def export_413_excel():
+    if 'user_id' not in session: return redirect(url_for('main.home'))
+    records = C413ICTRooms.query.all()
+    wb = Workbook(); ws = wb.active; ws.title = 'C4.1.3'
+    ws.merge_cells('A1:B1'); ws['A1'] = '4.1.3 Classrooms and Seminar Halls with ICT'
+    ws['A1'].font = Font(bold=True)
+    for col, h in enumerate(['Room Number or Name', 'Type of ICT facility'], 1): 
+        style_header_cell(ws.cell(row=2, column=col, value=h))
+    for r, rec in enumerate(records, 3):
+        style_data_cell(ws.cell(row=r, column=1, value=rec.room_number))
+        style_data_cell(ws.cell(row=r, column=2, value=rec.facilities))
+    out = io.BytesIO(); wb.save(out); out.seek(0)
+    return send_file(out, download_name='Criteria_4_1_3.xlsx', as_attachment=True)
+
+
+# ==================== CRITERIA 4.1.4 ====================
+@main.route('/criteria/4.1.4')
+def criteria_4_1_4():
+    if 'user_id' not in session: return redirect(url_for('main.home'))
+    return render_template('criteria4_1_4.html', data=C4Expenditure.query.all())
+
+@main.route('/add_414', methods=['POST'])
+def add_414():
+    if 'user_id' not in session: return redirect(url_for('main.home'))
+    year = request.form.get('year')
+    budget = request.form.get('budget_infra')
+    expenditure = request.form.get('expenditure_infra')
+    total = request.form.get('total_expenditure')
+    if year:
+        db.session.add(C4Expenditure(year=year, budget_infra=budget, expenditure_infra=expenditure, total_expenditure=total))
+        db.session.commit()
+    return redirect(url_for('main.criteria_4_1_4'))
+
+@main.route('/delete_414/<int:id>')
+def delete_414(id):
+    rec = C4Expenditure.query.get_or_404(id); db.session.delete(rec); db.session.commit()
+    return redirect(url_for('main.criteria_4_1_4'))
+
+@main.route('/export_414_excel')
+def export_414_excel():
+    if 'user_id' not in session: return redirect(url_for('main.home'))
+    records = C4Expenditure.query.all()
+    wb = Workbook(); ws = wb.active; ws.title = 'C4.1.4'
+    ws.merge_cells('A1:D1'); ws['A1'] = '4.1.4 Expenditure for Infrastructure Augmentation'
+    ws['A1'].font = Font(bold=True)
+    for i, h in enumerate(['Year', 'Budget Allocated', 'Expenditure on Infra', 'Total Expenditure'], 1):
+        style_header_cell(ws.cell(row=2, column=i, value=h))
+    for r, rec in enumerate(records, 3):
+        for i, val in enumerate([rec.year, rec.budget_infra, rec.expenditure_infra, rec.total_expenditure], 1):
+            style_data_cell(ws.cell(row=r, column=i, value=val))
+    out = io.BytesIO(); wb.save(out); out.seek(0)
+    return send_file(out, download_name='Criteria_4_1_4.xlsx', as_attachment=True)
+
+# ==================== CRITERIA 4.2.2 ====================
+@main.route('/criteria/4.2.2')
+def criteria_4_2_2():
+    if 'user_id' not in session: return redirect(url_for('main.home'))
+    return render_template('criteria4_2_2.html', data=C42Library.query.all())
+
+@main.route('/add_422', methods=['POST'])
+def add_422():
+    if 'user_id' not in session: return redirect(url_for('main.home'))
+    if request.form.get('year'):
+        db.session.add(C42Library(
+            year=request.form.get('year'),
+            expenditure_books=request.form.get('expenditure_books'),
+            expenditure_journals=request.form.get('expenditure_journals'),
+            expenditure_ejournals=request.form.get('expenditure_ejournals')
+        ))
+        db.session.commit()
+    return redirect(url_for('main.criteria_4_2_2'))
+
+@main.route('/delete_422/<int:id>')
+def delete_422(id):
+    rec = C42Library.query.get_or_404(id); db.session.delete(rec); db.session.commit()
+    return redirect(url_for('main.criteria_4_2_2'))
+
+@main.route('/export_422_excel')
+def export_422_excel():
+    if 'user_id' not in session: return redirect(url_for('main.home'))
+    records = C42Library.query.all()
+    wb = Workbook(); ws = wb.active; ws.title = 'C4.2.2'
+    ws.merge_cells('A1:D1'); ws['A1'] = '4.2.2 Library Expenditure'
+    ws['A1'].font = Font(bold=True)
+    for i, h in enumerate(['Year', 'Books Expend', 'Journals Expend', 'E-Journals Expend'], 1):
+        style_header_cell(ws.cell(row=2, column=i, value=h))
+    for r, rec in enumerate(records, 3):
+        for i, val in enumerate([rec.year, rec.expenditure_books, rec.expenditure_journals, rec.expenditure_ejournals], 1):
+            style_data_cell(ws.cell(row=r, column=i, value=val))
+    out = io.BytesIO(); wb.save(out); out.seek(0)
+    return send_file(out, download_name='Criteria_4_2_2.xlsx', as_attachment=True)
 

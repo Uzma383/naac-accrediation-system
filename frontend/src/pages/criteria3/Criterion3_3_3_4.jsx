@@ -3,11 +3,43 @@ import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import Sidebar from "../../components/Sidebar";
 import Footer from "../../components/Footer";
-import { getAcademicYears, getRecords, addRecord, updateRecord, deleteRecord } from "../../api/apiService";
+import { getAcademicYears, getRecords, addRecord, updateRecord, deleteRecord, getExcelExportUrl } from "../../api/apiService";
 
 const emptyForm = () => ({
   activity_name: "", agency_name: "", scheme_name: "", year: "", students_participated: "",
 });
+
+const FormFields = ({ data, onChange, yearOptions }) => (
+  <div className="row g-3">
+    <div className="col-md-3">
+      <label className="form-label-custom">Name of the Activity <span className="text-danger">*</span></label>
+      <input type="text" className="form-control" placeholder="Activity name"
+        value={data.activity_name} onChange={e => onChange("activity_name", e.target.value)} />
+    </div>
+    <div className="col-md-3">
+      <label className="form-label-custom">Organising Unit / Agency / Collaborating Agency</label>
+      <input type="text" className="form-control" placeholder="Organisation or agency"
+        value={data.agency_name} onChange={e => onChange("agency_name", e.target.value)} />
+    </div>
+    <div className="col-md-2">
+      <label className="form-label-custom">Name of the Scheme</label>
+      <input type="text" className="form-control" placeholder="Scheme name"
+        value={data.scheme_name} onChange={e => onChange("scheme_name", e.target.value)} />
+    </div>
+    <div className="col-md-2">
+      <label className="form-label-custom">Year of the Activity</label>
+      <select className="form-select" value={data.year} onChange={e => onChange("year", e.target.value)}>
+        <option value="">Select Year</option>
+        {yearOptions.map(y => <option key={y} value={y}>{y}</option>)}
+      </select>
+    </div>
+    <div className="col-md-2">
+      <label className="form-label-custom">Students Participated</label>
+      <input type="number" className="form-control" placeholder="Count"
+        value={data.students_participated} onChange={e => onChange("students_participated", e.target.value)} />
+    </div>
+  </div>
+);
 
 export default function Criterion3_3_3_4() {
   const navigate = useNavigate();
@@ -43,37 +75,7 @@ export default function Criterion3_3_3_4() {
     setEditRecord(null); showAlert("Updated!");
   };
 
-  const FormFields = ({ data, onChange }) => (
-    <div className="row g-3">
-      <div className="col-md-3">
-        <label className="form-label-custom">Name of the Activity <span className="text-danger">*</span></label>
-        <input type="text" className="form-control" placeholder="Activity name"
-          value={data.activity_name} onChange={e => onChange("activity_name", e.target.value)} />
-      </div>
-      <div className="col-md-3">
-        <label className="form-label-custom">Organising Unit / Agency / Collaborating Agency</label>
-        <input type="text" className="form-control" placeholder="Organisation or agency"
-          value={data.agency_name} onChange={e => onChange("agency_name", e.target.value)} />
-      </div>
-      <div className="col-md-2">
-        <label className="form-label-custom">Name of the Scheme</label>
-        <input type="text" className="form-control" placeholder="Scheme name"
-          value={data.scheme_name} onChange={e => onChange("scheme_name", e.target.value)} />
-      </div>
-      <div className="col-md-2">
-        <label className="form-label-custom">Year of the Activity</label>
-        <select className="form-select" value={data.year} onChange={e => onChange("year", e.target.value)}>
-          <option value="">Select Year</option>
-          {yearOptions.map(y => <option key={y} value={y}>{y}</option>)}
-        </select>
-      </div>
-      <div className="col-md-2">
-        <label className="form-label-custom">Number of Students Participated</label>
-        <input type="text" className="form-control" placeholder="Count"
-          value={data.students_participated} onChange={e => onChange("students_participated", e.target.value)} />
-      </div>
-    </div>
-  );
+
 
   return (
     <div className="app-layout">
@@ -84,7 +86,7 @@ export default function Criterion3_3_3_4() {
             <p className="text-muted mb-0" style={{ fontSize: "0.78rem", textTransform: "uppercase", letterSpacing: 1 }}>Criteria 3</p>
             <h4>3.3.3 & 3.3.4: Extension / Outreach Programs & Student Participation</h4>
           </div>
-          <button className="btn btn-success btn-sm fw-semibold" onClick={() => navigate("/export/3-3-3-4")}>
+          <button className="btn btn-success btn-sm fw-semibold" onClick={() => window.open(getExcelExportUrl('3_3_3_4'), '_blank')}>
             <i className="bi bi-file-earmark-excel me-1"></i> Export Excel
           </button>
         </header>
@@ -109,7 +111,7 @@ export default function Criterion3_3_3_4() {
               </h6>
               {loading ? <div className="text-center py-4"><div className="spinner-border text-danger"></div></div> : (
                 <>
-                  <FormFields data={form} onChange={handleChange} />
+                  <FormFields data={form} onChange={handleChange} yearOptions={yearOptions} />
                   <div className="text-end mt-3">
                     <button className="btn btn-danger px-5 fw-bold" onClick={handleSave}><i className="bi bi-save me-1"></i> Save Record</button>
                   </div>

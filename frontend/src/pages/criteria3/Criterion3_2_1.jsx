@@ -3,7 +3,7 @@ import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import Sidebar from "../../components/Sidebar";
 import Footer from "../../components/Footer";
-import { getRecords, addRecord, updateRecord, deleteRecord } from "../../api/apiService";
+import { getRecords, addRecord, updateRecord, deleteRecord, getExcelExportUrl } from "../../api/apiService";
 
 const emptyForm = () => ({
   paper_title: "", author_names: "", department: "",
@@ -58,7 +58,7 @@ export default function Criterion3_2_1() {
             <p className="text-muted mb-0" style={{ fontSize: "0.78rem", textTransform: "uppercase", letterSpacing: 1 }}>Criteria 3</p>
             <h4>3.2.1: Papers Published per Teacher in UGC Notified Journals</h4>
           </div>
-          <button className="btn btn-success btn-sm fw-semibold" onClick={() => navigate("/export/3-2-1")}>
+          <button className="btn btn-success btn-sm fw-semibold" onClick={() => window.open(getExcelExportUrl('3_2_1'), '_blank')}>
             <i className="bi bi-file-earmark-excel me-1"></i> Export Excel
           </button>
         </header>

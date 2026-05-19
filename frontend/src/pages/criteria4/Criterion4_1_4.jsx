@@ -6,19 +6,18 @@ import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import Sidebar from "../../components/Sidebar";
 import Footer from "../../components/Footer";
-import { getAcademicYears, getRecords, addRecord, deleteRecord } from "../../api/apiService";
+import { getAcademicYears, getRecords, addRecord, deleteRecord, getExcelExportUrl } from "../../api/apiService";
 
 const emptyForm = () => ({
   year: "",
-  budget_allocation: "",
-  expenditure_augmentation: "",
-  total_exp_excluding_salary: "",
-  maintenance_academic: "",
-  maintenance_physical: "",
+  budget_infra: "",
+  expenditure_infra: "",
+  total_expenditure_excl_salary: "",
+  expenditure_academic_maint: "",
+  expenditure_physical_maint: "",
 });
 
 export default function Criterion4_1_4() {
-  const navigate = useNavigate();
   const [yearOptions, setYearOptions]   = useState([]);
   const [loadingDropdowns, setLoadingDropdowns] = useState(true);
   const [form, setForm]                 = useState(emptyForm());
@@ -43,7 +42,7 @@ export default function Criterion4_1_4() {
 
   const handleSave = async () => {
     if (!form.year) return showAlert("Please select an academic year.", "danger");
-    if (!form.budget_allocation || !form.total_exp_excluding_salary) {
+    if (!form.budget_infra || !form.total_expenditure_excl_salary) {
       return showAlert("Budget Allocated and Total Expenditure are required.", "danger");
     }
     const result = await addRecord("4_1_4", form);
@@ -51,6 +50,8 @@ export default function Criterion4_1_4() {
       setRecords(prev => [...prev, result.data]);
       setForm(emptyForm());
       showAlert("Yearly record saved!");
+    } else {
+      showAlert(result.error || "Failed to save record", "danger");
     }
   };
 
@@ -62,11 +63,11 @@ export default function Criterion4_1_4() {
   };
 
   const fields = [
-    { key: "budget_allocation",          label: "Budget Allocated",          placeholder: "0.00" },
-    { key: "expenditure_augmentation",   label: "Exp. Augmentation",         placeholder: "0.00" },
-    { key: "total_exp_excluding_salary", label: "Total Exp. (Excl. Salary)", placeholder: "0.00" },
-    { key: "maintenance_academic",       label: "Maint. Academic",           placeholder: "0.00" },
-    { key: "maintenance_physical",       label: "Maint. Physical",           placeholder: "0.00" },
+    { key: "budget_infra",                  label: "Budget Allocated",          placeholder: "0.00" },
+    { key: "expenditure_infra",             label: "Exp. Augmentation",         placeholder: "0.00" },
+    { key: "total_expenditure_excl_salary", label: "Total Exp. (Excl. Salary)", placeholder: "0.00" },
+    { key: "expenditure_academic_maint",    label: "Maint. Academic",           placeholder: "0.00" },
+    { key: "expenditure_physical_maint",    label: "Maint. Physical",           placeholder: "0.00" },
   ];
 
   return (
@@ -80,7 +81,7 @@ export default function Criterion4_1_4() {
             <h4>4.1.4 &amp; 4.4.1: Infrastructure Expenditure</h4>
             <small className="text-muted" style={{ fontSize: "0.75rem" }}>INR in Lakhs — Excluding Salary</small>
           </div>
-          <button className="btn btn-success btn-sm fw-semibold" onClick={() => navigate("/export/4-1-4")}>
+          <button className="btn btn-success btn-sm fw-semibold" onClick={() => window.open(getExcelExportUrl('4_1_4'), '_blank')}>
             <i className="bi bi-file-earmark-excel me-1"></i> Export Excel
           </button>
         </header>
@@ -168,11 +169,11 @@ export default function Criterion4_1_4() {
                           {row.year}
                         </span>
                       </td>
-                      <td>{row.budget_allocation}</td>
-                      <td>{row.expenditure_augmentation}</td>
-                      <td className="fw-bold" style={{ color: "#0369a1" }}>{row.total_exp_excluding_salary}</td>
-                      <td>{row.maintenance_academic}</td>
-                      <td>{row.maintenance_physical}</td>
+                      <td>{row.budget_infra}</td>
+                      <td>{row.expenditure_infra}</td>
+                      <td className="fw-bold" style={{ color: "#0369a1" }}>{row.total_expenditure_excl_salary}</td>
+                      <td>{row.expenditure_academic_maint}</td>
+                      <td>{row.expenditure_physical_maint}</td>
                       <td className="text-center">
                         <button className="btn btn-outline-danger btn-sm" onClick={() => handleDelete(row.id)}>
                           <i className="bi bi-trash"></i>

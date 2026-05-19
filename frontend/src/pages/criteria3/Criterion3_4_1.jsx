@@ -3,15 +3,17 @@ import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import Sidebar from "../../components/Sidebar";
 import Footer from "../../components/Footer";
-import { getAcademicYears, getRecords, addRecord, updateRecord, deleteRecord } from "../../api/apiService";
+import { getAcademicYears, getRecords, addRecord, updateRecord, deleteRecord, getExcelExportUrl } from "../../api/apiService";
 
 const DURATION_OPTIONS = ["1 Month","2 Months","3 Months","4 Months","5 Months","6 Months","7 Months","8 Months","9 Months","10 Months","11 Months","12 Months"];
 const NATURE_OPTIONS = ["Offline", "Online", "Remote"];
 
 const emptyForm = () => ({
   activity_title: "", agency_name: "", participant_name: "",
-  year: "", duration: "", nature_of_activity: "", proof_link: "",
+  year: "", duration: "", nature_of_activity: "", proof_links: "",
 });
+
+
 
 export default function Criterion3_4_1() {
   const navigate = useNavigate();
@@ -47,51 +49,6 @@ export default function Criterion3_4_1() {
     setEditRecord(null); showAlert("Updated!");
   };
 
-  const FormFields = ({ data, onChange }) => (
-    <div className="row g-3">
-      <div className="col-md-4">
-        <label className="form-label-custom">Title of the Collaborative Activity <span className="text-danger">*</span></label>
-        <input type="text" className="form-control" placeholder="Collaboration title"
-          value={data.activity_title} onChange={e => onChange("activity_title", e.target.value)} />
-      </div>
-      <div className="col-md-4">
-        <label className="form-label-custom">Name of the Collaborating Agency with Contact Details</label>
-        <input type="text" className="form-control" placeholder="Agency name and contact"
-          value={data.agency_name} onChange={e => onChange("agency_name", e.target.value)} />
-      </div>
-      <div className="col-md-4">
-        <label className="form-label-custom">Name of the Participant</label>
-        <input type="text" className="form-control" placeholder="Participant name"
-          value={data.participant_name} onChange={e => onChange("participant_name", e.target.value)} />
-      </div>
-      <div className="col-md-2">
-        <label className="form-label-custom">Year of Collaboration</label>
-        <select className="form-select" value={data.year} onChange={e => onChange("year", e.target.value)}>
-          <option value="">Select Year</option>
-          {yearOptions.map(y => <option key={y} value={y}>{y}</option>)}
-        </select>
-      </div>
-      <div className="col-md-2">
-        <label className="form-label-custom">Duration</label>
-        <select className="form-select" value={data.duration} onChange={e => onChange("duration", e.target.value)}>
-          <option value="">Select Duration</option>
-          {DURATION_OPTIONS.map(d => <option key={d} value={d}>{d}</option>)}
-        </select>
-      </div>
-      <div className="col-md-2">
-        <label className="form-label-custom">Nature of the Activity</label>
-        <select className="form-select" value={data.nature_of_activity} onChange={e => onChange("nature_of_activity", e.target.value)}>
-          <option value="">Select Mode</option>
-          {NATURE_OPTIONS.map(n => <option key={n} value={n}>{n}</option>)}
-        </select>
-      </div>
-      <div className="col-md-6">
-        <label className="form-label-custom">Link to the Relevant Document (Proof)</label>
-        <input type="text" className="form-control" placeholder="Paste document URL or link"
-          value={data.proof_link} onChange={e => onChange("proof_link", e.target.value)} />
-      </div>
-    </div>
-  );
 
   return (
     <div className="app-layout">
@@ -102,7 +59,7 @@ export default function Criterion3_4_1() {
             <p className="text-muted mb-0" style={{ fontSize: "0.78rem", textTransform: "uppercase", letterSpacing: 1 }}>Criteria 3</p>
             <h4>3.4.1: Collaborations / Linkages During the Year</h4>
           </div>
-          <button className="btn btn-success btn-sm fw-semibold" onClick={() => navigate("/export/3-4-1")}>
+          <button className="btn btn-success btn-sm fw-semibold" onClick={() => window.open(getExcelExportUrl('3_4_1'), '_blank')}>
             <i className="bi bi-file-earmark-excel me-1"></i> Export Excel
           </button>
         </header>
@@ -126,7 +83,45 @@ export default function Criterion3_4_1() {
               </h6>
               {loading ? <div className="text-center py-4"><div className="spinner-border text-danger"></div></div> : (
                 <>
-                  <FormFields data={form} onChange={handleChange} />
+                  <div className="row g-3 mb-3">
+                    <div className="col-md-4">
+                      <label className="form-label-custom">Title of the Collaborative Activity <span className="text-danger">*</span></label>
+                      <input type="text" className="form-control" placeholder="Collaboration title"
+                        value={form.activity_title} onChange={e => handleChange("activity_title", e.target.value)} />
+                    </div>
+                    <div className="col-md-4">
+                      <label className="form-label-custom">Name of the Collaborating Agency with Contact Details</label>
+                      <input type="text" className="form-control" placeholder="Agency name and contact"
+                        value={form.agency_name} onChange={e => handleChange("agency_name", e.target.value)} />
+                    </div>
+                    <div className="col-md-4">
+                      <label className="form-label-custom">Name of the Participant</label>
+                      <input type="text" className="form-control" placeholder="Participant name"
+                        value={form.participant_name} onChange={e => handleChange("participant_name", e.target.value)} />
+                    </div>
+                    <div className="col-md-2">
+                      <label className="form-label-custom">Year of Collaboration</label>
+                      <select className="form-select" value={form.year} onChange={e => handleChange("year", e.target.value)}>
+                        <option value="">Select Year</option>
+                        {yearOptions.map(y => <option key={y} value={y}>{y}</option>)}
+                      </select>
+                    </div>
+                    <div className="col-md-2">
+                      <label className="form-label-custom">Duration</label>
+                      <input type="text" className="form-control" placeholder="e.g. 6 months"
+                        value={form.duration} onChange={e => handleChange("duration", e.target.value)} />
+                    </div>
+                    <div className="col-md-4">
+                      <label className="form-label-custom">Nature of the Activity</label>
+                      <input type="text" className="form-control" placeholder="e.g. Internship"
+                        value={form.nature_of_activity} onChange={e => handleChange("nature_of_activity", e.target.value)} />
+                    </div>
+                    <div className="col-md-4">
+                      <label className="form-label-custom">Proof Document Link</label>
+                      <input type="text" className="form-control" placeholder="Link to document"
+                        value={form.proof_links} onChange={e => handleChange("proof_links", e.target.value)} />
+                    </div>
+                  </div>
                   <div className="text-end mt-3">
                     <button className="btn btn-danger px-5 fw-bold" onClick={handleSave}><i className="bi bi-save me-1"></i> Save Record</button>
                   </div>
@@ -155,7 +150,7 @@ export default function Criterion3_4_1() {
                         <td><span className="badge" style={{ background: "#dcfce7", color: "#166534", fontWeight: 700 }}>{row.year}</span></td>
                         <td>{row.duration}</td>
                         <td><span className="badge bg-info text-dark">{row.nature_of_activity}</span></td>
-                        <td className="small"><a href={row.proof_link} target="_blank" rel="noreferrer">{row.proof_link}</a></td>
+                        <td className="small"><a href={row.proof_links} target="_blank" rel="noreferrer">{row.proof_links}</a></td>
                         <td className="text-center">
                           <div className="btn-group btn-group-sm">
                             <button className="btn btn-outline-primary" onClick={() => setEditRecord({ ...row })}><i className="bi bi-pencil-square"></i></button>
@@ -180,7 +175,45 @@ export default function Criterion3_4_1() {
                 <button className="btn-close btn-close-white" onClick={() => setEditRecord(null)}></button>
               </div>
               <div className="modal-body p-4">
-                <FormFields data={editRecord} onChange={(f, v) => setEditRecord({ ...editRecord, [f]: v })} />
+                <div className="row g-3">
+                  <div className="col-md-4">
+                    <label className="form-label-custom">Title of the Collaborative Activity <span className="text-danger">*</span></label>
+                    <input type="text" className="form-control" placeholder="Collaboration title"
+                      value={editRecord.activity_title || ""} onChange={e => setEditRecord({ ...editRecord, activity_title: e.target.value })} />
+                  </div>
+                  <div className="col-md-4">
+                    <label className="form-label-custom">Name of the Collaborating Agency with Contact Details</label>
+                    <input type="text" className="form-control" placeholder="Agency name and contact"
+                      value={editRecord.agency_name || ""} onChange={e => setEditRecord({ ...editRecord, agency_name: e.target.value })} />
+                  </div>
+                  <div className="col-md-4">
+                    <label className="form-label-custom">Name of the Participant</label>
+                    <input type="text" className="form-control" placeholder="Participant name"
+                      value={editRecord.participant_name || ""} onChange={e => setEditRecord({ ...editRecord, participant_name: e.target.value })} />
+                  </div>
+                  <div className="col-md-2">
+                    <label className="form-label-custom">Year of Collaboration</label>
+                    <select className="form-select" value={editRecord.year || ""} onChange={e => setEditRecord({ ...editRecord, year: e.target.value })}>
+                      <option value="">Select Year</option>
+                      {yearOptions.map(y => <option key={y} value={y}>{y}</option>)}
+                    </select>
+                  </div>
+                  <div className="col-md-2">
+                    <label className="form-label-custom">Duration</label>
+                    <input type="text" className="form-control" placeholder="e.g. 6 months"
+                      value={editRecord.duration || ""} onChange={e => setEditRecord({ ...editRecord, duration: e.target.value })} />
+                  </div>
+                  <div className="col-md-4">
+                    <label className="form-label-custom">Nature of the Activity</label>
+                    <input type="text" className="form-control" placeholder="e.g. Internship"
+                      value={editRecord.nature_of_activity || ""} onChange={e => setEditRecord({ ...editRecord, nature_of_activity: e.target.value })} />
+                  </div>
+                  <div className="col-md-4">
+                    <label className="form-label-custom">Proof Document Link</label>
+                    <input type="text" className="form-control" placeholder="Link to document"
+                      value={editRecord.proof_links || ""} onChange={e => setEditRecord({ ...editRecord, proof_links: e.target.value })} />
+                  </div>
+                </div>
               </div>
               <div className="modal-footer bg-light" style={{ borderRadius: "0 0 14px 14px" }}>
                 <button className="btn btn-secondary" onClick={() => setEditRecord(null)}>Cancel</button>

@@ -3,7 +3,7 @@ import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import Sidebar from "../../components/Sidebar";
 import Footer from "../../components/Footer";
-import { getRecords, addRecord, updateRecord, deleteRecord } from "../../api/apiService";
+import { getRecords, addRecord, updateRecord, deleteRecord, getExcelExportUrl } from "../../api/apiService";
 
 const emptyForm = () => ({
   year: "", sanctioned_posts_count: "", upload_supporting_document: "",
@@ -52,7 +52,7 @@ export default function Criterion3_2() {
             <p className="text-muted mb-0" style={{ fontSize: "0.78rem", textTransform: "uppercase", letterSpacing: 1 }}>Criteria 3</p>
             <h4>3.2: Number of Sanctioned Posts During the Year</h4>
           </div>
-          <button className="btn btn-success btn-sm fw-semibold" onClick={() => navigate("/export/3-2")}>
+          <button className="btn btn-success btn-sm fw-semibold" onClick={() => window.open(getExcelExportUrl('3_2'), '_blank')}>
             <i className="bi bi-file-earmark-excel me-1"></i> Export Excel
           </button>
         </header>
@@ -124,7 +124,13 @@ export default function Criterion3_2() {
                       <td className="text-muted small">{idx + 1}</td>
                       <td><span className="badge" style={{ background: "#dcfce7", color: "#166534", fontWeight: 700 }}>{row.year}</span></td>
                       <td className="fw-semibold">{row.sanctioned_posts_count}</td>
-                      <td className="small text-muted">{row.upload_supporting_document}</td>
+                      <td className="small">
+                        {row.upload_supporting_document ? (
+                          <a href={row.upload_supporting_document} target="_blank" rel="noopener noreferrer" className="text-primary text-decoration-none fw-semibold">
+                            <i className="bi bi-box-arrow-up-right me-1"></i> View Document
+                          </a>
+                        ) : <span className="text-muted">No link provided</span>}
+                      </td>
                       <td className="text-center">
                         <div className="btn-group btn-group-sm">
                           <button className="btn btn-outline-primary" onClick={() => setEditRecord({ ...row })}><i className="bi bi-pencil-square"></i></button>

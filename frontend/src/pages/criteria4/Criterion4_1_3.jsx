@@ -3,15 +3,13 @@
 // No dropdown needed — all fields are free-text
 // ============================================================
 import { useState, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
 import Sidebar from "../../components/Sidebar";
 import Footer from "../../components/Footer";
-import { getRecords, addRecord, deleteRecord } from "../../api/apiService";
+import { getRecords, addRecord, deleteRecord, getExcelExportUrl } from "../../api/apiService";
 
-const emptyForm = () => ({ room_details: "", ict_type: "", link: "" });
+const emptyForm = () => ({ room_number: "", ict_facility_type: "", geo_tagged_photo_link: "" });
 
 export default function Criterion4_1_3() {
-  const navigate = useNavigate();
   const [form, setForm]       = useState(emptyForm());
   const [records, setRecords] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -29,14 +27,16 @@ export default function Criterion4_1_3() {
   };
 
   const handleSave = async () => {
-    if (!form.room_details || !form.ict_type) {
-      return showAlert("Room details and ICT type are required.", "danger");
+    if (!form.room_number || !form.ict_facility_type) {
+      return showAlert("Room number and ICT type are required.", "danger");
     }
     const result = await addRecord("4_1_3", form);
     if (result.success) {
       setRecords(prev => [...prev, result.data]);
       setForm(emptyForm());
       showAlert("Record added successfully!");
+    } else {
+      showAlert(result.error || "Failed to save.", "danger");
     }
   };
 
@@ -58,7 +58,7 @@ export default function Criterion4_1_3() {
             <h4>4.1.3: ICT-Enabled Facilities</h4>
             <small className="text-muted" style={{ fontSize: "0.75rem" }}>Smart Classrooms, LMS, Labs etc.</small>
           </div>
-          <button className="btn btn-success btn-sm fw-semibold" onClick={() => navigate("/export/4-1-3")}>
+          <button className="btn btn-success btn-sm fw-semibold" onClick={() => window.open(getExcelExportUrl('4_1_3'), '_blank')}>
             <i className="bi bi-file-earmark-excel me-1"></i> Export Excel
           </button>
         </header>
@@ -87,8 +87,8 @@ export default function Criterion4_1_3() {
                   <input
                     type="text" className="form-control"
                     placeholder="e.g. Class Room No. 501"
-                    value={form.room_details}
-                    onChange={e => setForm({ ...form, room_details: e.target.value })}
+                    value={form.room_number}
+                    onChange={e => setForm({ ...form, room_number: e.target.value })}
                   />
                 </div>
                 <div className="col-md-4">
@@ -96,17 +96,17 @@ export default function Criterion4_1_3() {
                   <input
                     type="text" className="form-control"
                     placeholder="e.g. LCD Projector, LAN, Smart Board"
-                    value={form.ict_type}
-                    onChange={e => setForm({ ...form, ict_type: e.target.value })}
+                    value={form.ict_facility_type}
+                    onChange={e => setForm({ ...form, ict_facility_type: e.target.value })}
                   />
                 </div>
                 <div className="col-md-4">
-                  <label className="form-label-custom">Link to Photos / Timetable</label>
+                  <label className="form-label-custom">Link to Geo-Tagged Photos / Timetable</label>
                   <input
                     type="url" className="form-control"
                     placeholder="https://drive.google.com/..."
-                    value={form.link}
-                    onChange={e => setForm({ ...form, link: e.target.value })}
+                    value={form.geo_tagged_photo_link}
+                    onChange={e => setForm({ ...form, geo_tagged_photo_link: e.target.value })}
                   />
                 </div>
               </div>
@@ -143,15 +143,15 @@ export default function Criterion4_1_3() {
                       </tr>
                     ) : records.map(row => (
                       <tr key={row.id}>
-                        <td className="fw-semibold">{row.room_details}</td>
+                        <td className="fw-semibold">{row.room_number}</td>
                         <td>
                           <span className="badge" style={{ background: "#e0f2fe", color: "#0369a1", fontWeight: 600, fontSize: "0.78rem", padding: "5px 10px" }}>
-                            {row.ict_type}
+                            {row.ict_facility_type}
                           </span>
                         </td>
                         <td>
-                          {row.link
-                            ? <a href={row.link} target="_blank" rel="noreferrer" className="text-decoration-none text-danger small">
+                          {row.geo_tagged_photo_link
+                            ? <a href={row.geo_tagged_photo_link} target="_blank" rel="noreferrer" className="text-decoration-none text-danger small">
                                 <i className="bi bi-link-45deg me-1"></i>View Document
                               </a>
                             : <span className="text-muted small">No link provided</span>

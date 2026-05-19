@@ -3,9 +3,41 @@ import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import Sidebar from "../../components/Sidebar";
 import Footer from "../../components/Footer";
-import { getAcademicYears, getRecords, addRecord, updateRecord, deleteRecord } from "../../api/apiService";
+import { getAcademicYears, getRecords, addRecord, updateRecord, deleteRecord, getExcelExportUrl } from "../../api/apiService";
 
 const emptyForm = () => ({ year: "", event_name: "", participant_count: "", date_from_to: "", activity_report_link: "" });
+
+const FormFields = ({ data, onChange, yearOptions }) => (
+  <div className="row g-3">
+    <div className="col-md-2">
+      <label className="form-label-custom">Year <span className="text-danger">*</span></label>
+      <select className="form-select" value={data.year} onChange={e => onChange("year", e.target.value)}>
+        <option value="">Select Year</option>
+        {yearOptions.map(y => <option key={y} value={y}>{y}</option>)}
+      </select>
+    </div>
+    <div className="col-md-3">
+      <label className="form-label-custom">Name of the Workshop / Seminar <span className="text-danger">*</span></label>
+      <input type="text" className="form-control" placeholder="Event name" value={data.event_name} onChange={e => onChange("event_name", e.target.value)} />
+    </div>
+    <div className="col-md-2">
+      <label className="form-label-custom">Number of Participants</label>
+      <input type="text" className="form-control" placeholder="Count" value={data.participant_count} onChange={e => onChange("participant_count", e.target.value)} />
+    </div>
+    <div className="col-md-2">
+      <label className="form-label-custom">Date From</label>
+      <input type="date" className="form-control" value={data.date_from} onChange={e => onChange("date_from", e.target.value)} />
+    </div>
+    <div className="col-md-2">
+      <label className="form-label-custom">Date To</label>
+      <input type="date" className="form-control" value={data.date_to} onChange={e => onChange("date_to", e.target.value)} />
+    </div>
+    <div className="col-md-6">
+      <label className="form-label-custom">Link to Activity Report (Proof)</label>
+      <input type="text" className="form-control" placeholder="Paste link to report" value={data.activity_report_link} onChange={e => onChange("activity_report_link", e.target.value)} />
+    </div>
+  </div>
+);
 
 export default function Criterion3_1_3() {
   const navigate = useNavigate();
@@ -42,33 +74,6 @@ export default function Criterion3_1_3() {
     setEditRecord(null); showAlert("Updated!");
   };
 
-  const FormFields = ({ data, onChange }) => (
-    <div className="row g-3">
-      <div className="col-md-2">
-        <label className="form-label-custom">Year <span className="text-danger">*</span></label>
-        <select className="form-select" value={data.year} onChange={e => onChange("year", e.target.value)}>
-          <option value="">Select Year</option>
-          {yearOptions.map(y => <option key={y} value={y}>{y}</option>)}
-        </select>
-      </div>
-      <div className="col-md-3">
-        <label className="form-label-custom">Name of the Workshop / Seminar <span className="text-danger">*</span></label>
-        <input type="text" className="form-control" placeholder="Event name" value={data.event_name} onChange={e => onChange("event_name", e.target.value)} />
-      </div>
-      <div className="col-md-2">
-        <label className="form-label-custom">Number of Participants</label>
-        <input type="text" className="form-control" placeholder="Count" value={data.participant_count} onChange={e => onChange("participant_count", e.target.value)} />
-      </div>
-      <div className="col-md-2">
-        <label className="form-label-custom">Date From – To</label>
-        <input type="text" className="form-control" placeholder="e.g. 10-09-2024" value={data.date_from_to} onChange={e => onChange("date_from_to", e.target.value)} />
-      </div>
-      <div className="col-md-3">
-        <label className="form-label-custom">Link to Activity Report on Website (Proof)</label>
-        <input type="text" className="form-control" placeholder="Paste URL" value={data.activity_report_link} onChange={e => onChange("activity_report_link", e.target.value)} />
-      </div>
-    </div>
-  );
 
   return (
     <div className="app-layout">
@@ -79,7 +84,7 @@ export default function Criterion3_1_3() {
             <p className="text-muted mb-0" style={{ fontSize: "0.78rem", textTransform: "uppercase", letterSpacing: 1 }}>Criteria 3</p>
             <h4>3.1.3: Seminars / Conferences / Workshops Conducted</h4>
           </div>
-          <button className="btn btn-success btn-sm fw-semibold" onClick={() => navigate("/export/3-1-3")}>
+          <button className="btn btn-success btn-sm fw-semibold" onClick={() => window.open(getExcelExportUrl('3_1_3'), '_blank')}>
             <i className="bi bi-file-earmark-excel me-1"></i> Export Excel
           </button>
         </header>
@@ -103,7 +108,7 @@ export default function Criterion3_1_3() {
               </h6>
               {loading ? <div className="text-center py-4"><div className="spinner-border text-danger"></div></div> : (
                 <>
-                  <FormFields data={form} onChange={handleChange} />
+                  <FormFields data={form} onChange={handleChange} yearOptions={yearOptions} />
                   <div className="text-end mt-3">
                     <button className="btn btn-danger px-5 fw-bold" onClick={handleSave}><i className="bi bi-save me-1"></i> Save Record</button>
                   </div>

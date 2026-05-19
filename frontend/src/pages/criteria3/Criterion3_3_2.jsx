@@ -3,9 +3,33 @@ import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import Sidebar from "../../components/Sidebar";
 import Footer from "../../components/Footer";
-import { getAcademicYears, getRecords, addRecord, updateRecord, deleteRecord } from "../../api/apiService";
+import { getAcademicYears, getRecords, addRecord, updateRecord, deleteRecord, getExcelExportUrl } from "../../api/apiService";
 
 const emptyForm = () => ({ activity_name: "", award_name: "", awarding_body: "", award_year: "" });
+
+const FormFields = ({ data, onChange, yearOptions }) => (
+  <div className="row g-3">
+    <div className="col-md-3">
+      <label className="form-label-custom">Name of the Activity <span className="text-danger">*</span></label>
+      <input type="text" className="form-control" placeholder="Activity name" value={data.activity_name} onChange={e => onChange("activity_name", e.target.value)} />
+    </div>
+    <div className="col-md-3">
+      <label className="form-label-custom">Name of the Award / Recognition</label>
+      <input type="text" className="form-control" placeholder="Award or recognition name" value={data.award_name} onChange={e => onChange("award_name", e.target.value)} />
+    </div>
+    <div className="col-md-4">
+      <label className="form-label-custom">Name of the Awarding Government / Government Recognised Bodies</label>
+      <input type="text" className="form-control" placeholder="Awarding body" value={data.awarding_body} onChange={e => onChange("awarding_body", e.target.value)} />
+    </div>
+    <div className="col-md-2">
+      <label className="form-label-custom">Year of Award</label>
+      <select className="form-select" value={data.award_year} onChange={e => onChange("award_year", e.target.value)}>
+        <option value="">Select Year</option>
+        {yearOptions.map(y => <option key={y} value={y}>{y}</option>)}
+      </select>
+    </div>
+  </div>
+);
 
 export default function Criterion3_3_2() {
   const navigate = useNavigate();
@@ -41,30 +65,6 @@ export default function Criterion3_3_2() {
     setEditRecord(null); showAlert("Updated!");
   };
 
-  const FormFields = ({ data, onChange }) => (
-    <div className="row g-3">
-      <div className="col-md-3">
-        <label className="form-label-custom">Name of the Activity <span className="text-danger">*</span></label>
-        <input type="text" className="form-control" placeholder="Activity name" value={data.activity_name} onChange={e => onChange("activity_name", e.target.value)} />
-      </div>
-      <div className="col-md-3">
-        <label className="form-label-custom">Name of the Award / Recognition</label>
-        <input type="text" className="form-control" placeholder="Award or recognition name" value={data.award_name} onChange={e => onChange("award_name", e.target.value)} />
-      </div>
-      <div className="col-md-4">
-        <label className="form-label-custom">Name of the Awarding Government / Government Recognised Bodies</label>
-        <input type="text" className="form-control" placeholder="Awarding body" value={data.awarding_body} onChange={e => onChange("awarding_body", e.target.value)} />
-      </div>
-      <div className="col-md-2">
-        <label className="form-label-custom">Year of Award</label>
-        <select className="form-select" value={data.award_year} onChange={e => onChange("award_year", e.target.value)}>
-          <option value="">Select Year</option>
-          {yearOptions.map(y => <option key={y} value={y}>{y}</option>)}
-        </select>
-      </div>
-    </div>
-  );
-
   return (
     <div className="app-layout">
       <Sidebar activePage="3_3_2" />
@@ -74,7 +74,7 @@ export default function Criterion3_3_2() {
             <p className="text-muted mb-0" style={{ fontSize: "0.78rem", textTransform: "uppercase", letterSpacing: 1 }}>Criteria 3</p>
             <h4>3.3.2: Awards & Recognitions for Extension Activities</h4>
           </div>
-          <button className="btn btn-success btn-sm fw-semibold" onClick={() => navigate("/export/3-3-2")}>
+          <button className="btn btn-success btn-sm fw-semibold" onClick={() => window.open(getExcelExportUrl('3_3_2'), '_blank')}>
             <i className="bi bi-file-earmark-excel me-1"></i> Export Excel
           </button>
         </header>
@@ -97,7 +97,7 @@ export default function Criterion3_3_2() {
                 <i className="bi bi-plus-circle me-2 text-danger"></i>Add Award Record
               </h6>
               {loading ? <div className="text-center py-4"><div className="spinner-border text-danger"></div></div> : (
-                <><FormFields data={form} onChange={handleChange} />
+                <><FormFields data={form} onChange={handleChange} yearOptions={yearOptions} />
                   <div className="text-end mt-3">
                     <button className="btn btn-danger px-5 fw-bold" onClick={handleSave}><i className="bi bi-save me-1"></i> Save Record</button>
                   </div>

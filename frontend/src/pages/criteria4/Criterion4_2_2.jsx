@@ -7,20 +7,21 @@ import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import Sidebar from "../../components/Sidebar";
 import Footer from "../../components/Footer";
-import { getLibraryResources, getRecords, addRecord, updateRecord, deleteRecord } from "../../api/apiService";
+import { getLibraryResources, getAcademicYears, getRecords, addRecord, updateRecord, deleteRecord, getExcelExportUrl } from "../../api/apiService";
 
 const emptyForm = () => ({
-  resource: "",
-  details: "",
-  exp_subscription: "",
-  exp_others: "",
-  total_exp: "",
-  link: "",
+  academic_year: "",
+  resource_type: "",
+  membership_details: "",
+  expenditure_ejournals: "",
+  expenditure_eresources: "",
+  total_library_expenditure: "",
+  proof_links: "",
 });
 
 export default function Criterion4_2_2() {
-  const navigate = useNavigate();
   const [resourceOptions, setResourceOptions] = useState([]);
+  const [yearOptions, setYearOptions] = useState([]);
   const [loadingDropdowns, setLoadingDropdowns] = useState(true);
   const [form, setForm]         = useState(emptyForm());
   const [records, setRecords]   = useState([]);
@@ -28,9 +29,10 @@ export default function Criterion4_2_2() {
   const [alert, setAlert]       = useState(null);
 
   useEffect(() => {
-    Promise.all([getLibraryResources(), getRecords("4_2_2")])
-      .then(([resources, recs]) => {
+    Promise.all([getLibraryResources(), getAcademicYears(), getRecords("4_2_2")])
+      .then(([resources, years, recs]) => {
         setResourceOptions(resources);
+        setYearOptions(years);
         setRecords(recs);
       })
       .finally(() => setLoadingDropdowns(false));
@@ -45,9 +47,9 @@ export default function Criterion4_2_2() {
   const updateForm = (field, val) => {
     setForm(prev => {
       const updated = { ...prev, [field]: val };
-      const sub   = parseFloat(field === "exp_subscription" ? val : prev.exp_subscription) || 0;
-      const other = parseFloat(field === "exp_others"       ? val : prev.exp_others)       || 0;
-      updated.total_exp = (sub + other).toFixed(2);
+      const sub   = parseFloat(field === "expenditure_ejournals" ? val : prev.expenditure_ejournals) || 0;
+      const other = parseFloat(field === "expenditure_eresources" ? val : prev.expenditure_eresources) || 0;
+      updated.total_library_expenditure = (sub + other).toFixed(2);
       return updated;
     });
   };
@@ -55,15 +57,15 @@ export default function Criterion4_2_2() {
   const updateEditForm = (field, val) => {
     setEditRecord(prev => {
       const updated = { ...prev, [field]: val };
-      const sub   = parseFloat(field === "exp_subscription" ? val : prev.exp_subscription) || 0;
-      const other = parseFloat(field === "exp_others"       ? val : prev.exp_others)       || 0;
-      updated.total_exp = (sub + other).toFixed(2);
+      const sub   = parseFloat(field === "expenditure_ejournals" ? val : prev.expenditure_ejournals) || 0;
+      const other = parseFloat(field === "expenditure_eresources" ? val : prev.expenditure_eresources) || 0;
+      updated.total_library_expenditure = (sub + other).toFixed(2);
       return updated;
     });
   };
 
   const handleSave = async () => {
-    if (!form.resource || !form.details) {
+    if (!form.resource_type || !form.membership_details) {
       return showAlert("Resource type and membership details are required.", "danger");
     }
     const result = await addRecord("4_2_2", form);
@@ -71,6 +73,8 @@ export default function Criterion4_2_2() {
       setRecords(prev => [...prev, result.data]);
       setForm(emptyForm());
       showAlert("Library record added!");
+    } else {
+      showAlert(result.error || "Failed to save.", "danger");
     }
   };
 
@@ -109,7 +113,7 @@ export default function Criterion4_2_2() {
             <h4>4.2.2 &amp; 4.2.3: Library Resources &amp; Expenditure</h4>
             <small className="text-muted" style={{ fontSize: "0.75rem" }}>Subscription and Purchase Records (INR in Lakhs)</small>
           </div>
-          <button className="btn btn-success btn-sm fw-semibold" onClick={() => navigate("/export/4-2-2")}>
+          <button className="btn btn-success btn-sm fw-semibold" onClick={() => window.open(getExcelExportUrl('4_2_2'), '_blank')}>
             <i className="bi bi-file-earmark-excel me-1"></i> Export Excel
           </button>
         </header>
@@ -136,44 +140,51 @@ export default function Criterion4_2_2() {
               ) : (
                 <>
                   <div className="row g-3">
-                    {/* Resource dropdown — from API */}
                     <div className="col-md-3">
                       <label className="form-label-custom">Library Resource</label>
-                      <select className="form-select" value={form.resource} onChange={e => setForm({ ...form, resource: e.target.value })}>
+                      <select className="form-select" value={form.resource_type} onChange={e => setForm({ ...form, resource_type: e.target.value })}>
                         <option value="">Select Resource</option>
                         {resourceOptions.map(r => <option key={r} value={r}>{r}</option>)}
+                      </select>
+                    </div>
+
+                    <div className="col-md-2">
+                      <label className="form-label-custom">Academic Year</label>
+                      <select className="form-select" value={form.academic_year} onChange={e => setForm({ ...form, academic_year: e.target.value })}>
+                        <option value="">Select Year</option>
+                        {yearOptions.map(y => <option key={y} value={y}>{y}</option>)}
                       </select>
                     </div>
 
                     <div className="col-md-3">
                       <label className="form-label-custom">Membership Details</label>
                       <input type="text" className="form-control" placeholder="e.g. IEEE, N-LIST, Delnet"
-                        value={form.details} onChange={e => setForm({ ...form, details: e.target.value })} />
+                        value={form.membership_details} onChange={e => setForm({ ...form, membership_details: e.target.value })} />
                     </div>
 
                     <div className="col-md-2">
-                      <label className="form-label-custom">Exp. (Subscription) ₹L</label>
+                      <label className="form-label-custom">Exp. (e-Journals) ₹L</label>
                       <input type="number" step="0.01" className="form-control" placeholder="0.00"
-                        value={form.exp_subscription} onChange={e => updateForm("exp_subscription", e.target.value)} />
+                        value={form.expenditure_ejournals} onChange={e => updateForm("expenditure_ejournals", e.target.value)} />
                     </div>
 
                     <div className="col-md-2">
                       <label className="form-label-custom">Exp. (Others) ₹L</label>
                       <input type="number" step="0.01" className="form-control" placeholder="0.00"
-                        value={form.exp_others} onChange={e => updateForm("exp_others", e.target.value)} />
+                        value={form.expenditure_eresources} onChange={e => updateForm("expenditure_eresources", e.target.value)} />
                     </div>
 
                     <div className="col-md-2">
                       <label className="form-label-custom">Total Exp. ₹L</label>
                       <input type="number" step="0.01" className="form-control"
                         style={{ background: "#f8f9fa", fontWeight: 700 }}
-                        value={form.total_exp} readOnly />
+                        value={form.total_library_expenditure} readOnly />
                     </div>
 
                     <div className="col-12">
                       <label className="form-label-custom">Document Link</label>
                       <input type="url" className="form-control" placeholder="https://drive.google.com/..."
-                        value={form.link} onChange={e => setForm({ ...form, link: e.target.value })} />
+                        value={form.proof_links} onChange={e => setForm({ ...form, proof_links: e.target.value })} />
                     </div>
                   </div>
 
@@ -206,21 +217,21 @@ export default function Criterion4_2_2() {
                   {records.length === 0 ? (
                     <tr><td colSpan={7} className="text-center text-muted py-5">No library records yet.</td></tr>
                   ) : records.map((row, i) => {
-                    const c = resourceBadgeColor[row.resource] || { bg: "#f1f5f9", text: "#475569" };
+                    const c = resourceBadgeColor[row.resource_type] || { bg: "#f1f5f9", text: "#475569" };
                     return (
                       <tr key={row.id} style={{ background: i % 2 === 0 ? "white" : "#f9fafb" }}>
                         <td>
                           <span className="badge px-3 py-2" style={{ background: c.bg, color: c.text, fontWeight: 700, fontSize: "0.75rem" }}>
-                            {row.resource}
+                            {row.resource_type}
                           </span>
                         </td>
-                        <td className="fw-semibold">{row.details}</td>
-                        <td>{row.exp_subscription}</td>
-                        <td>{row.exp_others}</td>
-                        <td className="fw-bold" style={{ color: "#0369a1" }}>{row.total_exp}</td>
+                        <td className="fw-semibold">{row.membership_details}</td>
+                        <td>{row.expenditure_ejournals}</td>
+                        <td>{row.expenditure_eresources}</td>
+                        <td className="fw-bold" style={{ color: "#0369a1" }}>{row.total_library_expenditure}</td>
                         <td>
-                          {row.link
-                            ? <a href={row.link} target="_blank" rel="noreferrer" className="btn btn-sm btn-outline-primary">
+                          {row.proof_links
+                            ? <a href={row.proof_links} target="_blank" rel="noreferrer" className="btn btn-sm btn-outline-primary">
                                 <i className="bi bi-link-45deg me-1"></i>View
                               </a>
                             : <span className="text-muted small">No link</span>}
